@@ -18,23 +18,23 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements Serializ
     private AtomicInteger total = new AtomicInteger(0);
     private FutureConnection connection;
     
-    private int fireAndForget;
-    
-    public static void main(String[] args){
-    	
-    	String host = "tcps://localhost:8883";
-    	String topic = "TEST.MQTT";
-    	String message = "This is my test messsage.";
-    	int aggregate = 10000;    	
-    	MqttPublisher producer = new MqttPublisher();
 
-    	try {
-    		producer.setupTest(host, topic);
-    		producer.produce(message, topic, aggregate);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    }
+    
+//    public static void main(String[] args){
+//    	
+//    	String host = "tcps://localhost:8883";
+//    	String topic = "TEST.MQTT";
+//    	String message = "This is my test messsage.";
+//    	int aggregate = 10000;    	
+//    	MqttPublisher producer = new MqttPublisher();
+//
+//    	try {
+//    		producer.setupTest(host, topic);
+//    		producer.produce(message, topic, aggregate);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//    }
     
     
     @Override

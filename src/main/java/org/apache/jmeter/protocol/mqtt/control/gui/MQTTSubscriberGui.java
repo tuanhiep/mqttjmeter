@@ -47,7 +47,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
 
     private final JLabeledTextField urlField = new JLabeledTextField(JMeterUtils.getResString("mqtt_provider_url")); // $NON-NLS-1$
     private final JLabeledTextField mqttDestination = new JLabeledTextField(JMeterUtils.getResString("mqtt_topic")); // $NON-NLS-1$
-    private final JLabeledTextField mqttDurableSubscriptionId = new JLabeledTextField(JMeterUtils.getResString("mqtt_durable_subscription_id")); // $NON-NLS-1$
     private final JLabeledTextField mqttClientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); // $NON-NLS-1$
     private final JLabeledTextField mqttUser = new JLabeledTextField(JMeterUtils.getResString("mqtt_user")); // $NON-NLS-1$
     private final JLabeledTextField mqttPwd = new JLabeledPasswordField(JMeterUtils.getResString("mqtt_pwd")); // $NON-NLS-1$
@@ -60,7 +59,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
     //++ Do not change these strings; they are used in JMX files to record the button settings
     public static final String RECEIVE_RSC = "mqtt_subscriber_receive"; // $NON-NLS-1$
     public static final String ON_MESSAGE_RSC = "mqtt_subscriber_on_message"; // $NON-NLS-1$
-    //--
+  
     // Button group resources
     private static final String[] CLIENT_ITEMS = { RECEIVE_RSC, ON_MESSAGE_RSC };
     private final JLabeledRadioI18N clientChoice = new JLabeledRadioI18N("mqtt_client_type", CLIENT_ITEMS, RECEIVE_RSC); // $NON-NLS-1$
@@ -102,7 +101,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         this.configureTestElement(sampler);
         sampler.setProviderUrl(urlField.getText());
         sampler.setDestination(mqttDestination.getText());
-        sampler.setDurableSubscriptionId(mqttDurableSubscriptionId.getText());
         sampler.setClientID(mqttClientId.getText());
         sampler.setUsername(mqttUser.getText());
         sampler.setPassword(mqttPwd.getText());
@@ -131,7 +129,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         mqttPwd.setToolTipText(Context.SECURITY_CREDENTIALS);
         mainPanel.add(urlField);
         mainPanel.add(createDestinationPane());
-        mainPanel.add(mqttDurableSubscriptionId);
         mainPanel.add(mqttClientId);
         mainPanel.add(useAuth);
         mainPanel.add(mqttUser);
@@ -156,7 +153,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         SubscriberSampler sampler = (SubscriberSampler) el;  
         urlField.setText(sampler.getProviderUrl());        
         mqttDestination.setText(sampler.getDestination());
-        mqttDurableSubscriptionId.setText(sampler.getDurableSubscriptionId());
         mqttClientId.setText(sampler.getClientId());    
         mqttUser.setText(sampler.getUsername());
         mqttPwd.setText(sampler.getPassword());
@@ -177,7 +173,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         super.clearGui();
         urlField.setText(""); // $NON-NLS-1$
         mqttDestination.setText(""); // $NON-NLS-1$
-        mqttDurableSubscriptionId.setText(""); // $NON-NLS-1$
         mqttClientId.setText(""); // $NON-NLS-1$     
         mqttUser.setText(""); // $NON-NLS-1$
         mqttPwd.setText(""); // $NON-NLS-1$

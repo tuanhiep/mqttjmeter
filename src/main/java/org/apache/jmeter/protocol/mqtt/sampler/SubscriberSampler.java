@@ -2,17 +2,26 @@ package org.apache.jmeter.protocol.mqtt.sampler;
 
 
 
+
+import java.util.Date;
+
+import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.apache.jmeter.protocol.mqtt.client.MqttSubscriber;
 import org.apache.jmeter.protocol.mqtt.control.gui.MQTTSubscriberGui;
 import org.apache.jmeter.samplers.Interruptible;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.ThreadListener;
 import org.apache.jmeter.util.JMeterUtils;
+import org.apache.jorphan.logging.LoggingManager;
+import org.apache.log.Logger;
 
 public class SubscriberSampler extends BaseMQTTSampler implements Interruptible, ThreadListener, TestStateListener{
 
 	
 	private static final long serialVersionUID = 240L;
+	private static final Logger log = LoggingManager.getLoggerForClass();
 	private static final String DURABLE_SUBSCRIPTION_ID = "mqtt.durableSubscriptionId"; // $NON-NLS-1$
     private static final String DURABLE_SUBSCRIPTION_ID_DEFAULT = "";
     private static final String CLIENT_ID = "mqtt.clientId"; // $NON-NLS-1$
@@ -25,6 +34,8 @@ public class SubscriberSampler extends BaseMQTTSampler implements Interruptible,
     private static final String SEPARATOR_DEFAULT = ""; // $NON-NLS-1$
     // This was the old value that was checked for
     private static final String RECEIVE_STR = JMeterUtils.getResString(MQTTSubscriberGui.RECEIVE_RSC); // $NON-NLS-1$
+    public transient MqttSubscriber subscriber = null;
+    private JavaSamplerContext context = null;
 
     
     
@@ -37,39 +48,83 @@ public class SubscriberSampler extends BaseMQTTSampler implements Interruptible,
     
 	@Override
 	public void testEnded() {
-		// TODO Auto-generated method stub
-		
-	}
+			}
 
 	@Override
 	public void testEnded(String arg0) {
-		// TODO Auto-generated method stub
+		this.testEnded();
 		
 	}
 
 	@Override
 	public void testStarted() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void testStarted(String arg0) {
-		// TODO Auto-generated method stub
-		
+		this.testStarted();
 	}
+	// ------------------------------ For Thread ---------------------------------//
+	
+	private void logThreadStart() {
+		if (log.isDebugEnabled()) {
+			log.debug("Thread started " + new Date());
+			log.debug("MQTTSampler: [" + Thread.currentThread().getName()
+					+ "], hashCode=[" + hashCode() + "]");
 
-	@Override
-	public void threadFinished() {
-		// TODO Auto-generated method stub
-		
+		}
+
 	}
-
+	
 	@Override
 	public void threadStarted() {
-		// TODO Auto-generated method stub
+	    
+		this.logThreadStart();		
+		if(this.subscriber==null){
+			
+			try {
+				this.subscriber = new MqttSubscriber();
+			} catch (Exception e) {
+				log.warn(e.getLocalizedMessage(), e);
+			}
+			}
+		String host = getProviderUrl();
+		String topic = getDestination();
+		String aggregate = "" + getIterationCount();
+		String clientId= getClientId();		
+		Arguments parameters = new Arguments();
+		parameters.addArgument("HOST", host);
+		parameters.addArgument("CLIENT_ID", clientId);
+		parameters.addArgument("TOPIC", topic);
+		parameters.addArgument("AGGREGATE", aggregate);
+		parameters.addArgument("DURABLE", "false");
+		this.context = new JavaSamplerContext(parameters);
+		this.subscriber.setupTest(context);
+		
+		
 		
 	}
+	
+	@Override
+	public void threadFinished() {
+
+		log.debug("Thread ended " + new Date());
+		if (this.subscriber != null) {
+
+			try {
+				this.subscriber.close();
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.warn(e.getLocalizedMessage(), e);
+			}
+			
+
+		}
+	}
+
+	
 
 	@Override
 	public boolean interrupt() {
@@ -79,8 +134,8 @@ public class SubscriberSampler extends BaseMQTTSampler implements Interruptible,
 
 	@Override
 	public SampleResult sample() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return this.subscriber.runTest(context);
 	}
 
 	

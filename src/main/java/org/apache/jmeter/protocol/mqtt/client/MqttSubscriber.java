@@ -14,28 +14,28 @@ import org.fusesource.mqtt.client.Message;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
 
-public class MqttSubcriber extends AbstractJavaSamplerClient implements Serializable {
+public class MqttSubscriber extends AbstractJavaSamplerClient implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private static final long TIMEOUT = 105000L;
 
 	private FutureConnection connection;
 
-	public static void main(String[] args){
-		String host = "tcp://localhost:1883";
-		String topic = "TEST.MQTT";
-		String clientId = "me";
-		boolean durable = false;
-		int aggregate = 1000;
-
-		MqttSubcriber consumer = new MqttSubcriber();
-		try {
-			consumer.setupTest(host, topic, durable, clientId);
-			consumer.consume(aggregate);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args){
+//		String host = "tcp://localhost:1883";
+//		String topic = "TEST.MQTT";
+//		String clientId = "me";
+//		boolean durable = false;
+//		int aggregate = 1000;
+//
+//		MqttSubscriber consumer = new MqttSubscriber();
+//		try {
+//			consumer.setupTest(host, topic, durable, clientId);
+//			consumer.consume(aggregate);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 
 	@Override
@@ -94,9 +94,8 @@ public class MqttSubcriber extends AbstractJavaSamplerClient implements Serializ
 				return;
 			}
 			msg.ack();
-			System.out.println(new String(msg.getPayload()));
-		
-//			getLogger().debug("consumed " + i);
+//			System.out.println(new String(msg.getPayload()));
+			getLogger().debug("consumed " + i);
 		}
 	}
 
@@ -111,9 +110,8 @@ public class MqttSubcriber extends AbstractJavaSamplerClient implements Serializ
 
 			result.sampleEnd(); // stop stopwatch
 
-
 			result.setSuccessful( true );
-			result.setResponseMessage("Received" + context.getParameter("AGGREGATE") + " messages");
+			result.setResponseMessage("Received " + context.getParameter("AGGREGATE") + " messages");
 			result.setResponseCode("OK");
 		} catch (Exception e) {
 			result.sampleEnd(); // stop stopwatch
@@ -129,5 +127,11 @@ public class MqttSubcriber extends AbstractJavaSamplerClient implements Serializ
 		}
 
 		return result;
+	}
+
+
+	public void close() {
+		if(this.connection!= null)
+		this.connection.disconnect();
 	}
 }
