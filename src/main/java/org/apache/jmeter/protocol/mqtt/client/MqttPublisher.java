@@ -83,17 +83,30 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements Serializ
     }
     
     private void produce(JavaSamplerContext context) throws Exception{
-    	produce(context.getParameter("MESSAGE"), context.getParameter("TOPIC"), Integer.parseInt(context.getParameter("AGGREGATE")));
+    	
+    	produce(context.getParameter("MESSAGE"), context.getParameter("TOPIC"), Integer.parseInt(context.getParameter("AGGREGATE")), context.getParameter("QOS"), context.getParameter("RETAINED"));
     }
     
-    private void produce(String message, String topic, int aggregate) throws Exception{
-
-    	for(int i = 0; i < aggregate; ++i){
+    private void produce(String message, String topic, int aggregate, String qos, String isRetained) throws Exception{
+    	
+        QoS quality = null;
+       
+        if("mqtt_extactly_once".equals(qos)){
+        	quality = QoS.EXACTLY_ONCE;
+        } else if("mqtt_at_least_once".equals(qos)){
+        	quality= QoS.AT_LEAST_ONCE;
+        } else if("mqtt_at_most_once".equals(qos)){
+        	quality = QoS.AT_MOST_ONCE;
+        } 
+        boolean retained = false;
+        if("TRUE".equals(isRetained)) retained = true;
+       	for(int i = 0; i < aggregate; ++i){
     		
-    		this.connection.publish(topic, message.getBytes(), QoS.EXACTLY_ONCE, false).await();
+    		this.connection.publish(topic, message.getBytes(),quality, retained).await();
     		
     		total.incrementAndGet();
     	}
+    	
     }
     
     public SampleResult runTest(JavaSamplerContext context) {

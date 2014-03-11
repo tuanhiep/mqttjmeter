@@ -2,7 +2,6 @@ package org.apache.jmeter.protocol.mqtt.control.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -10,8 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import org.apache.jmeter.gui.util.FilePanel;
 import org.apache.jmeter.gui.util.JLabeledRadioI18N;
 import org.apache.jmeter.gui.util.JSyntaxTextArea;
 import org.apache.jmeter.gui.util.JTextScrollPane;
@@ -31,7 +28,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		ChangeListener {
 
 	private static final long serialVersionUID = 240L;
-	private static final String ALL_FILES = "*.*"; //$NON-NLS-1$
+
 	/** Take source from the named file */
 	public static final String USE_FILE_RSC = "mqtt_use_file"; //$NON-NLS-1$
 	/** Take source from a random file */
@@ -46,29 +43,60 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	public static final String OBJECT_MSG_RSC = "mqtt_object_message"; //$NON-NLS-1$
 	/** Create a BytesMessage */
 	public static final String BYTES_MSG_RSC = "mqtt_bytes_message"; //$NON-NLS-1$
-	// Button group resources when Bytes Message is selected
-	private static final String[] CONFIG_ITEMS_BYTES_MSG = { USE_FILE_RSC,USE_RANDOM_RSC };
-	// Button group resources
-	private static final String[] CONFIG_ITEMS = { USE_FILE_RSC,USE_RANDOM_RSC, USE_TEXT_RSC };
+	/** Create a message of type long number */
+	public static final String LONG = "mqtt_long_value"; //$NON-NLS-1$
+	/** Create a Message of type integer number */
+	public static final String INT = "mqtt_int_value"; //$NON-NLS-1$
+	/** Create a Message of type double number */
+	public static final String DOUBLE = "mqtt_double_value"; //$NON-NLS-1$
+	/** Create a Message of type double number */
+	public static final String FLOAT = "mqtt_float_value"; //$NON-NLS-1$
+	/** Create a Message of type String */
+	public static final String STRING = "mqtt_string_value"; //$NON-NLS-1$
+
 	// These are the names of properties used to define the labels
 	private static final String DEST_SETUP_STATIC = "mqtt_dest_setup_static"; // $NON-NLS-1$
 	private static final String DEST_SETUP_DYNAMIC = "mqtt_dest_setup_dynamic"; // $NON-NLS-1$
+	private static final String GENERATED_VALUE = "mqtt_generated_value"; // $NON-NLS-1$
+	private static final String FIXED_VALUE = "mqtt_fixed_value";// $NON-NLS-1$
+	private static final String PSEUDO = "mqtt_pseudo_random";// $NON-NLS-1$
+	private static final String SECURE = "mqtt_secure_random";// $NON-NLS-1$
+	private static final String EXACTLY_ONCE = "mqtt_extactly_once";// $NON-NLS-1$
+	private static final String AT_LEAST_ONCE = "mqtt_at_least_once";// $NON-NLS-1$
+	private static final String AT_MOST_ONCE = "mqtt_at_most_once";// $NON-NLS-1$
 	// Button group resources
 	private static final String[] DEST_SETUP_ITEMS = { DEST_SETUP_STATIC,DEST_SETUP_DYNAMIC };
 	private final JLabeledRadioI18N destSetup = new JLabeledRadioI18N("mqtt_dest_setup", DEST_SETUP_ITEMS, DEST_SETUP_STATIC); // $NON-NLS-1$
-	private static final String[] MSGTYPES_ITEMS = { TEXT_MSG_RSC, MAP_MSG_RSC,	OBJECT_MSG_RSC, BYTES_MSG_RSC };
+	private static final String[] MSGTYPES_ITEMS = { TEXT_MSG_RSC,GENERATED_VALUE,FIXED_VALUE };
+	private static final String[] VALTYPES_ITEMS = { INT,LONG,FLOAT,DOUBLE};
+	private static final String[] FVALTYPES_ITEMS = {INT,LONG,FLOAT,DOUBLE,STRING};
+	private static final String[] RANTYPES_ITEMS = {PSEUDO,SECURE};
+	private static final String[] QTYPES_ITEMS = {EXACTLY_ONCE,AT_LEAST_ONCE,AT_MOST_ONCE};
 	private final JLabeledTextField urlField = new JLabeledTextField(JMeterUtils.getResString("mqtt_provider_url")); //$NON-NLS-1$
 	private final JLabeledTextField mqttDestination = new JLabeledTextField(JMeterUtils.getResString("mqtt_topic")); //$NON-NLS-1$
 	private final JCheckBox useAuth = new JCheckBox(JMeterUtils.getResString("mqtt_use_auth"), false); //$NON-NLS-1$
 	private final JLabeledTextField mqttUser = new JLabeledTextField(JMeterUtils.getResString("mqtt_user")); //$NON-NLS-1$
 	private final JLabeledTextField mqttPwd = new JLabeledPasswordField(JMeterUtils.getResString("mqtt_pwd")); //$NON-NLS-1$
 	private final JLabeledTextField iterations = new JLabeledTextField(	JMeterUtils.getResString("mqtt_itertions")); //$NON-NLS-1$
-	private final FilePanel messageFile = new FilePanel(JMeterUtils.getResString("mqtt_file"), ALL_FILES); //$NON-NLS-1$
-	private final FilePanel randomFile = new FilePanel(	JMeterUtils.getResString("mqtt_random_file"), ALL_FILES); //$NON-NLS-1$
 	private final JSyntaxTextArea textMessage = new JSyntaxTextArea(10, 50); // $NON-NLS-1$
 	private final JLabeledRadioI18N msgChoice = new JLabeledRadioI18N("mqtt_message_type", MSGTYPES_ITEMS, TEXT_MSG_RSC); //$NON-NLS-1$
-	private final JLabeledRadioI18N configChoice = new JLabeledRadioI18N("mqtt_config", CONFIG_ITEMS, USE_TEXT_RSC); //$NON-NLS-1$
 
+	// For messages content
+	private final JCheckBox useTimeStamp = new JCheckBox(JMeterUtils.getResString("mqtt_use_time_stamp"), false); // $NON-NLS-1$
+	private final JCheckBox useNumberSeq = new JCheckBox(JMeterUtils.getResString("mqtt_use_number_seq"), false); // $NON-NLS-1$
+	private final JCheckBox isRetained = new JCheckBox(JMeterUtils.getResString("mqtt_send_as_retained_msg"), false); // $NON-NLS-1$
+	private final JLabeledRadioI18N typeQoSValue = new JLabeledRadioI18N("mqtt_qos", QTYPES_ITEMS,EXACTLY_ONCE); //$NON-NLS-1$
+	private final JLabeledRadioI18N typeGeneratedValue = new JLabeledRadioI18N("mqtt_type_of_generated_value", VALTYPES_ITEMS,INT); //$NON-NLS-1$
+	private final JLabeledRadioI18N typeFixedValue = new JLabeledRadioI18N("mqtt_type_of_fixed_value", FVALTYPES_ITEMS,INT); //$NON-NLS-1$
+	private final JLabeledTextField min = new JLabeledTextField(JMeterUtils.getResString("mqtt_min_value")); //$NON-NLS-1$
+	private final JLabeledTextField max = new JLabeledTextField(JMeterUtils.getResString("mqtt_max_value")); //$NON-NLS-1$
+	private final JLabeledTextField value = new JLabeledTextField(JMeterUtils.getResString("mqtt_value")); //$NON-NLS-1$
+	private final JLabeledRadioI18N typeRandom = new JLabeledRadioI18N("mqtt_type_random", RANTYPES_ITEMS,PSEUDO); //$NON-NLS-1$
+	private final JLabeledTextField seed = new JLabeledTextField(JMeterUtils.getResString("mqtt_seed_random")); //$NON-NLS-1$
+	private final JLabel textArea = new JLabel(JMeterUtils.getResString("mqtt_text_area"));
+	private final JTextScrollPane textPanel = new JTextScrollPane(textMessage);
+	
+	
 	public MQTTPublisherGui() {
 		init();
 	}
@@ -83,20 +111,45 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mainPanel.add(createDestinationPane());
 		mainPanel.add(createAuthPane());
 		mainPanel.add(iterations);
-		configChoice.setLayout(new BoxLayout(configChoice, BoxLayout.X_AXIS));
-		mainPanel.add(configChoice);
 		msgChoice.setLayout(new BoxLayout(msgChoice, BoxLayout.X_AXIS));
 		mainPanel.add(msgChoice);
-		mainPanel.add(messageFile);
-		mainPanel.add(randomFile);
+		mainPanel.add(useTimeStamp);
+		mainPanel.add(useNumberSeq);
+		mainPanel.add(isRetained);
+//---------------------------------------QoS --------------------------------------------//
+		this.typeQoSValue.setLayout(new BoxLayout(typeQoSValue, BoxLayout.X_AXIS));
+		mainPanel.add(this.typeQoSValue);
+//----------------------------------Fixed Value Panel------------------------------------//	
+		JPanel FPanel = new JPanel();
+		typeFixedValue.setLayout(new BoxLayout(typeFixedValue, BoxLayout.Y_AXIS));
+		FPanel.add(typeFixedValue);
+		FPanel.add(value);
+		mainPanel.add(FPanel);
+		
+//----------------------------------Generated Value Panel--------------------------------//		
+		JPanel GPanel = new JPanel();
+		typeGeneratedValue.setLayout(new BoxLayout(typeGeneratedValue, BoxLayout.Y_AXIS));
+		GPanel.add(typeGeneratedValue);
+		GPanel.add(min);		
+		GPanel.add(max);
+		this.typeRandom.setLayout(new BoxLayout(typeRandom, BoxLayout.Y_AXIS));
+		GPanel.add(typeRandom);
+		GPanel.add(seed);
+		mainPanel.add(GPanel);
+//---------------------------------------------------------------------------------------//
 		JPanel messageContentPanel = new JPanel(new BorderLayout());
-		messageContentPanel.add(new JLabel(JMeterUtils.getResString("mqtt_text_area")),	BorderLayout.NORTH);
-		messageContentPanel.add(new JTextScrollPane(textMessage),BorderLayout.CENTER);
+		messageContentPanel.add(this.textArea,	BorderLayout.NORTH);
+		messageContentPanel.add(this.textPanel,BorderLayout.CENTER);
 		mainPanel.add(messageContentPanel);
 		useAuth.addChangeListener(this);
-		configChoice.addChangeListener(this);
-		msgChoice.addChangeListener(this);
-		
+        msgChoice.addChangeListener(this);
+		typeFixedValue.addChangeListener(this);
+		typeQoSValue.addChangeListener(this);
+		typeRandom.addChangeListener(this);
+		max.addChangeListener(this);
+		min.addChangeListener(this);
+		value.addChangeListener(this);
+		seed.addChangeListener(this);
 	}
 
 	/**
@@ -137,10 +190,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mqttUser.setText(""); // $NON-NLS-1$
 		mqttPwd.setText(""); // $NON-NLS-1$
 		textMessage.setInitialText(""); // $NON-NLS-1$
-		messageFile.setFilename(""); // $NON-NLS-1$
-		randomFile.setFilename(""); // $NON-NLS-1$
 		msgChoice.setText(""); // $NON-NLS-1$
-		configChoice.setText(USE_TEXT_RSC);
 		updateConfig(USE_TEXT_RSC);
 		msgChoice.setText(TEXT_MSG_RSC);
 		iterations.setText("1"); // $NON-NLS-1$
@@ -148,6 +198,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mqttUser.setEnabled(false);
 		mqttPwd.setEnabled(false);
 		destSetup.setText(DEST_SETUP_STATIC);
+		this.textArea.setText("");
+		
 	}
 
 	private void setupSamplerProperties(PublisherSampler sampler) {
@@ -157,13 +209,12 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		sampler.setUsername(mqttUser.getText());
 		sampler.setPassword(mqttPwd.getText());
 		sampler.setTextMessage(textMessage.getText());
-		sampler.setInputFile(messageFile.getFilename());
-		sampler.setRandomPath(randomFile.getFilename());
-		sampler.setConfigChoice(configChoice.getText());
 		sampler.setMessageChoice(msgChoice.getText());
 		sampler.setIterations(iterations.getText());
 		sampler.setUseAuth(useAuth.isSelected());
-
+		sampler.setQuality(typeQoSValue.getText());
+        sampler.setRetained(isRetained.isSelected());
+        if(sampler.isRetained()) System.out.println(" Hello everyone");
 	}
 		
 	
@@ -180,9 +231,6 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mqttPwd.setText(sampler.getPassword());
 		textMessage.setInitialText(sampler.getTextMessage());
 		textMessage.setCaretPosition(0);
-		messageFile.setFilename(sampler.getInputFile());
-		randomFile.setFilename(sampler.getRandomPath());
-		configChoice.setText(sampler.getConfigChoice());
 		msgChoice.setText(sampler.getMessageChoice());
 		iterations.setText(sampler.getIterations());
 		useAuth.setSelected(sampler.isUseAuth());
@@ -190,9 +238,11 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mqttPwd.setEnabled(useAuth.isSelected());
 		destSetup.setText(sampler.isDestinationStatic() ? DEST_SETUP_STATIC	: DEST_SETUP_DYNAMIC);
 		updateChoice(msgChoice.getText());
-		updateConfig(sampler.getConfigChoice());
+	
 	}
 	
+
+
 	@Override
 	public TestElement createTestElement() {
 		PublisherSampler sampler = new PublisherSampler();
@@ -209,18 +259,9 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 
 		if (command.equals(USE_TEXT_RSC)) {
 			textMessage.setEnabled(true);
-			messageFile.enableFile(false);
-			randomFile.enableFile(false);
-		} else if (command.equals(USE_RANDOM_RSC)) {
-			textMessage.setEnabled(false);
-			messageFile.enableFile(false);
-			randomFile.enableFile(true);
-		} else {
-			textMessage.setEnabled(false);
-			messageFile.enableFile(true);
-			randomFile.enableFile(false);
-		}
 
+		} 
+	
 	}
 
 	@Override
@@ -242,14 +283,14 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	@Override
 	public void stateChanged(ChangeEvent event) {
 
-		if (event.getSource() == configChoice) {
-			updateConfig(configChoice.getText());
-		} else if (event.getSource() == msgChoice) {
+	
+		if (event.getSource() == msgChoice) {
 			updateChoice(msgChoice.getText());
 		} else if (event.getSource() == useAuth) {
 			mqttUser.setEnabled(useAuth.isSelected());
 			mqttPwd.setEnabled(useAuth.isSelected());
-		}
+		} 
+
 	}
 
 	/**
@@ -258,16 +299,45 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	 * @param command
 	 */
 	private void updateChoice(String command) {
-
-		String oldChoice = configChoice.getText();
-		if (BYTES_MSG_RSC.equals(command)) {
-			String newChoice = USE_TEXT_RSC.equals(oldChoice) ? USE_FILE_RSC : oldChoice;
-			configChoice.resetButtons(CONFIG_ITEMS_BYTES_MSG, newChoice);
-			textMessage.setEnabled(false);
-		} else {
-			configChoice.resetButtons(CONFIG_ITEMS, oldChoice);
-			textMessage.setEnabled(true);
-		}
+		
+		if(TEXT_MSG_RSC.equals(command)){
+			
+			this.typeGeneratedValue.setVisible(false);
+			this.typeFixedValue.setVisible(false);
+			this.max.setVisible(false);
+			this.min.setVisible(false);
+			this.value.setVisible(false);
+			this.typeRandom.setVisible(false);
+			this.seed.setVisible(false);
+			this.textArea.setVisible(true);
+			this.textPanel.setVisible(true);
+			
+			
+										}
+		else if(GENERATED_VALUE.equals(command)) {
+//			this.textMessage.setEnabled(false);
+			this.typeFixedValue.setVisible(false);
+			this.value.setVisible(false);
+			this.textArea.setVisible(false);
+			this.textPanel.setVisible(false);
+			this.typeGeneratedValue.setVisible(true);
+			this.max.setVisible(true);
+			this.min.setVisible(true);
+			this.typeRandom.setVisible(true);
+			this.seed.setVisible(true);
+			
+		} else if(FIXED_VALUE.equals(command)){
+//			this.textMessage.setEnabled(false);
+			this.typeGeneratedValue.setVisible(false);
+			this.typeFixedValue.setVisible(true);
+			this.max.setVisible(false);
+			this.min.setVisible(false);
+			this.value.setVisible(true);
+			this.typeRandom.setVisible(false);
+			this.seed.setVisible(false);
+			this.textArea.setVisible(false);
+			this.textPanel.setVisible(false);
+											}				
 		validate();
 	}
 

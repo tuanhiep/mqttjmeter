@@ -23,6 +23,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static final String TEXT_MSG = "mqtt.text_message"; //$NON-NLS-1$
 	private static final String CONFIG_CHOICE = "mqtt.config_choice"; //$NON-NLS-1$
 	private static final String MESSAGE_CHOICE = "mqtt.config_msg_type"; //$NON-NLS-1$
+	private static final String QUALITY = "mqtt.quality"; //$NON-NLS-1$
+	private static boolean  RETAIN = false;
 	public transient MqttPublisher producer = null;
 	// These static variables are only used to convert existing files
 	private static final String USE_FILE_LOCALNAME = JMeterUtils
@@ -93,7 +95,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			return MQTTPublisherGui.USE_RANDOM_RSC;
 		}
 		return config; // will be the 3rd option, which is not checked
-						// specifically
+					   // specifically
 	}
 
 	/**
@@ -104,7 +106,21 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	public String getMessageChoice() {
 		return getPropertyAsString(MESSAGE_CHOICE);
 	}
-
+	public String getQuality() {
+		return getPropertyAsString(QUALITY);
+	}
+	public void setQuality( String quality){
+		setProperty(QUALITY, quality);
+	}
+	public void setRetained(boolean isRetained){
+		PublisherSampler.RETAIN = isRetained;
+		
+	}
+	public boolean  isRetained(){
+		return PublisherSampler.RETAIN;
+		
+	}
+	
 	// ------------------------------ For Thread ---------------------------------//
 
 	private void logThreadStart() {
@@ -126,8 +142,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 
 			try {
 				producer = new MqttPublisher();
-
-			} catch (Exception e) {
+			    } catch (Exception e) {
 				log.warn(e.getLocalizedMessage(), e);
 			}
 		}
@@ -135,17 +150,27 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			String host = getProviderUrl();
 			String topic = getDestination();
 			String aggregate = "" + getIterationCount();
-			String message = getTextMessage();
 			Arguments parameters = new Arguments();
 			parameters.addArgument("HOST", host);
 			parameters.addArgument("CLIENT_ID", "Hiep");
 			parameters.addArgument("TOPIC", topic);
 			parameters.addArgument("AGGREGATE", aggregate);
+			String message = getTextMessage();
 			parameters.addArgument("MESSAGE", message);
+			String quality= getQuality();
+			parameters.addArgument("QOS",quality);
+			if(this.isRetained()){
+				parameters.addArgument("RETAINED","TRUE");
+			}else{
+				parameters.addArgument("RETAINED","FALSE");
+				 }
+			
 			this.context = new JavaSamplerContext(parameters);
 			this.producer.setupTest(this.context);
 
 	}
+
+	
 
 	@Override
 	public void threadFinished() {
