@@ -57,13 +57,13 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	// These are the names of properties used to define the labels
 	private static final String DEST_SETUP_STATIC = "mqtt_dest_setup_static"; // $NON-NLS-1$
 	private static final String DEST_SETUP_DYNAMIC = "mqtt_dest_setup_dynamic"; // $NON-NLS-1$
-	private static final String GENERATED_VALUE = "mqtt_generated_value"; // $NON-NLS-1$
-	private static final String FIXED_VALUE = "mqtt_fixed_value";// $NON-NLS-1$
-	private static final String PSEUDO = "mqtt_pseudo_random";// $NON-NLS-1$
-	private static final String SECURE = "mqtt_secure_random";// $NON-NLS-1$
-	private static final String EXACTLY_ONCE = "mqtt_extactly_once";// $NON-NLS-1$
-	private static final String AT_LEAST_ONCE = "mqtt_at_least_once";// $NON-NLS-1$
-	private static final String AT_MOST_ONCE = "mqtt_at_most_once";// $NON-NLS-1$
+	public static final String GENERATED_VALUE = "mqtt_generated_value"; // $NON-NLS-1$
+	public static final String FIXED_VALUE = "mqtt_fixed_value";// $NON-NLS-1$
+	public static final String PSEUDO = "mqtt_pseudo_random";// $NON-NLS-1$
+	public static final String SECURE = "mqtt_secure_random";// $NON-NLS-1$
+	public static final String EXACTLY_ONCE = "mqtt_extactly_once";// $NON-NLS-1$
+	public static final String AT_LEAST_ONCE = "mqtt_at_least_once";// $NON-NLS-1$
+	public static final String AT_MOST_ONCE = "mqtt_at_most_once";// $NON-NLS-1$
 	// Button group resources
 	private static final String[] DEST_SETUP_ITEMS = { DEST_SETUP_STATIC,DEST_SETUP_DYNAMIC };
 	private final JLabeledRadioI18N destSetup = new JLabeledRadioI18N("mqtt_dest_setup", DEST_SETUP_ITEMS, DEST_SETUP_STATIC); // $NON-NLS-1$
@@ -146,10 +146,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		typeFixedValue.addChangeListener(this);
 		typeQoSValue.addChangeListener(this);
 		typeRandom.addChangeListener(this);
-		max.addChangeListener(this);
-		min.addChangeListener(this);
-		value.addChangeListener(this);
-		seed.addChangeListener(this);
+	
 	}
 
 	/**
@@ -214,7 +211,13 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		sampler.setUseAuth(useAuth.isSelected());
 		sampler.setQuality(typeQoSValue.getText());
         sampler.setRetained(isRetained.isSelected());
-        if(sampler.isRetained()) System.out.println(" Hello everyone");
+        sampler.setTYPE_FIXED_VALUE(typeFixedValue.getText());
+        sampler.setFIXED_VALUE(this.value.getText());
+        sampler.setTYPE_RANDOM_VALUE(this.typeRandom.getText());
+        sampler.setMAX_RANDOM_VALUE(this.max.getText());
+        sampler.setMIN_RANDOM_VALUE(this.min.getText());
+        sampler.setTYPE_GENERATED_VALUE(this.typeGeneratedValue.getText());
+        sampler.setSEED(this.seed.getText());
 	}
 		
 	
@@ -315,7 +318,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			
 										}
 		else if(GENERATED_VALUE.equals(command)) {
-//			this.textMessage.setEnabled(false);
+
 			this.typeFixedValue.setVisible(false);
 			this.value.setVisible(false);
 			this.textArea.setVisible(false);
@@ -327,7 +330,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			this.seed.setVisible(true);
 			
 		} else if(FIXED_VALUE.equals(command)){
-//			this.textMessage.setEnabled(false);
+
 			this.typeGeneratedValue.setVisible(false);
 			this.typeFixedValue.setVisible(true);
 			this.max.setVisible(false);

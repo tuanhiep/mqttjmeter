@@ -24,7 +24,14 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static final String CONFIG_CHOICE = "mqtt.config_choice"; //$NON-NLS-1$
 	private static final String MESSAGE_CHOICE = "mqtt.config_msg_type"; //$NON-NLS-1$
 	private static final String QUALITY = "mqtt.quality"; //$NON-NLS-1$
+	private static final String TYPE_FIXED_VALUE ="mqtt.type_fixed_value"; //$NON-NLS-1$
 	private static boolean  RETAIN = false;
+	private static String  FIXED_VALUE = "mqtt.fixed_value";
+	private static String  TYPE_RANDOM_VALUE = "mqtt.type_random_value";
+	private static String  MIN_RANDOM_VALUE = "mqtt.min_random_value";
+	private static String  MAX_RANDOM_VALUE = "mqtt.max_random_value";
+	private static String  TYPE_GENERATED_VALUE = "mqtt.max_random_value";
+	private static String  SEED = "mqtt.seed";
 	public transient MqttPublisher producer = null;
 	// These static variables are only used to convert existing files
 	private static final String USE_FILE_LOCALNAME = JMeterUtils
@@ -41,7 +48,66 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	}
 
 	// ---------------------Get/Set Property--------------------------//
+	
+	
+	
+	
+    public void setTYPE_FIXED_VALUE(String type) {
+    	setProperty(TYPE_FIXED_VALUE, type);
+		
+	}
+    public  String getSEED() {
+		return SEED;
+	}
 
+	public void setSEED(String sEED) {
+		SEED = sEED;
+	}
+
+	public String getTYPE_GENERATED_VALUE() {
+		return TYPE_GENERATED_VALUE;
+	}
+
+	public void setTYPE_GENERATED_VALUE(String tYPE_GENERATED_VALUE) {
+		TYPE_GENERATED_VALUE = tYPE_GENERATED_VALUE;
+	}
+
+	public  String getTYPE_RANDOM_VALUE() {
+		return TYPE_RANDOM_VALUE;
+	}
+
+	public void setTYPE_RANDOM_VALUE(String tYPE_RANDOM_VALUE) {
+		TYPE_RANDOM_VALUE = tYPE_RANDOM_VALUE;
+	}
+
+	public  String getMIN_RANDOM_VALUE() {
+		return MIN_RANDOM_VALUE;
+	}
+
+	public  void setMIN_RANDOM_VALUE(String mIN_RANDOM_VALUE) {
+		MIN_RANDOM_VALUE = mIN_RANDOM_VALUE;
+	}
+
+	public  String getMAX_RANDOM_VALUE() {
+		return MAX_RANDOM_VALUE;
+	}
+
+	public  void setMAX_RANDOM_VALUE(String mAX_RANDOM_VALUE) {
+		MAX_RANDOM_VALUE = mAX_RANDOM_VALUE;
+	}
+
+	public  String getFIXED_VALUE() {
+		return FIXED_VALUE;
+	}
+
+	public  void setFIXED_VALUE(String fIXED_VALUE) {
+		FIXED_VALUE = fIXED_VALUE;
+	}
+
+	public String getTYPE_FIXED_VALUE() {
+    	return getPropertyAsString(TYPE_FIXED_VALUE);
+		
+	}
 	public void setInputFile(String file) {
 		setProperty(INPUT_FILE, file);
 
@@ -155,8 +221,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			parameters.addArgument("CLIENT_ID", "Hiep");
 			parameters.addArgument("TOPIC", topic);
 			parameters.addArgument("AGGREGATE", aggregate);
-			String message = getTextMessage();
-			parameters.addArgument("MESSAGE", message);
+			
 			String quality= getQuality();
 			parameters.addArgument("QOS",quality);
 			if(this.isRetained()){
@@ -164,6 +229,29 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			}else{
 				parameters.addArgument("RETAINED","FALSE");
 				 }
+			//---------------------Message Choice----------------------------//
+			
+			if(this.getMessageChoice().equals(MQTTPublisherGui.TEXT_MSG_RSC)){
+				String message = getTextMessage();
+				parameters.addArgument("MESSAGE", message);
+				parameters.addArgument("TYPE_MESSAGE","TEXT");
+				parameters.addArgument("TYPE_VALUE","TEXT");
+			}
+			else if(this.getMessageChoice().equals(MQTTPublisherGui.FIXED_VALUE)){
+				String message = getFIXED_VALUE();
+				parameters.addArgument("MESSAGE", message);
+				parameters.addArgument("TYPE_MESSAGE","FIXED");
+				String type_value= this.getTYPE_FIXED_VALUE();
+				parameters.addArgument("TYPE_VALUE",type_value);
+			}
+			else if(this.getMessageChoice().equals(MQTTPublisherGui.GENERATED_VALUE)){
+				parameters.addArgument("TYPE_MESSAGE","RANDOM");
+				String type_value= this.getTYPE_RANDOM_VALUE();
+				parameters.addArgument("TYPE_VALUE",type_value);
+			}
+			
+			
+			//---------------------------------------------------------------//
 			
 			this.context = new JavaSamplerContext(parameters);
 			this.producer.setupTest(this.context);
@@ -197,5 +285,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 		
 		return this.producer.runTest(context);
 	}
+
+	
 
 	}
