@@ -218,6 +218,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
         sampler.setMIN_RANDOM_VALUE(this.min.getText());
         sampler.setTYPE_GENERATED_VALUE(this.typeGeneratedValue.getText());
         sampler.setSEED(this.seed.getText());
+        sampler.setUSE_TIMESTAMP(useTimeStamp.isSelected());
+        sampler.setUSE_NUMBER_SEQUENCE(useNumberSeq.isSelected());
 	}
 		
 	

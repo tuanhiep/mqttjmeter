@@ -26,6 +26,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static final String QUALITY = "mqtt.quality"; //$NON-NLS-1$
 	private static final String TYPE_FIXED_VALUE ="mqtt.type_fixed_value"; //$NON-NLS-1$
 	private static boolean  RETAIN = false;
+	private static boolean USE_TIMESTAMP= false;
+	private static boolean USE_NUMBER_SEQUENCE= false;
 	private static String  FIXED_VALUE = "mqtt.fixed_value";
 	private static String  TYPE_RANDOM_VALUE = "mqtt.type_random_value";
 	private static String  MIN_RANDOM_VALUE = "mqtt.min_random_value";
@@ -56,7 +58,23 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
     	setProperty(TYPE_FIXED_VALUE, type);
 		
 	}
-    public  String getSEED() {
+    public  boolean isUSE_TIMESTAMP() {
+		return USE_TIMESTAMP;
+	}
+
+	public void setUSE_TIMESTAMP(boolean uSE_TIMESTAMP) {
+		USE_TIMESTAMP = uSE_TIMESTAMP;
+	}
+
+	public  boolean isUSE_NUMBER_SEQUENCE() {
+		return USE_NUMBER_SEQUENCE;
+	}
+
+	public  void setUSE_NUMBER_SEQUENCE(boolean uSE_NUMBER_SEQUENCE) {
+		USE_NUMBER_SEQUENCE = uSE_NUMBER_SEQUENCE;
+	}
+
+	public  String getSEED() {
 		return SEED;
 	}
 
@@ -229,6 +247,19 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			}else{
 				parameters.addArgument("RETAINED","FALSE");
 				 }
+			//-------------------------TimeStamp-----------------------------//
+			
+			if(this.isUSE_TIMESTAMP()){
+				parameters.addArgument("TIME_STAMP","TRUE");
+			}else parameters.addArgument("TIME_STAMP","FALSE");
+			
+			//-------------------------Number Sequence-----------------------//
+			
+			if(this.isUSE_NUMBER_SEQUENCE()){
+				parameters.addArgument("NUMBER_SEQUENCE","TRUE");
+			}
+			else parameters.addArgument("NUMBER_SEQUENCE","FALSE");
+			
 			//---------------------Message Choice----------------------------//
 			
 			if(this.getMessageChoice().equals(MQTTPublisherGui.TEXT_MSG_RSC)){
@@ -266,8 +297,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 		if (producer != null) {
 
 			try {
-				this.producer.close();
-
+				producer.close();
+                MqttPublisher.numSeq=0;
 			} catch (IOException e) {
 				e.printStackTrace();
 				log.warn(e.getLocalizedMessage(), e);

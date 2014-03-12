@@ -1,9 +1,12 @@
 package org.apache.jmeter.protocol.mqtt.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.jmeter.config.Arguments;
@@ -20,6 +23,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	private static final long serialVersionUID = 1L;
 	private AtomicInteger total = new AtomicInteger(0);
 	private FutureConnection connection;
+	public static int numSeq=0;
 
 	// public static void main(String[] args){
 	//
@@ -91,6 +95,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					Integer.parseInt(context.getParameter("AGGREGATE")),
 					context.getParameter("QOS"),
 					context.getParameter("RETAINED"),
+					context.getParameter("TIME_STAMP"),
+					context.getParameter("NUMBER_SEQUENCE"),					
 					context.getParameter("TYPE_VALUE"));
 
 		} else if ("RANDOM".equals(context.getParameter("TYPE_MESSAGE"))) {
@@ -101,13 +107,15 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					Integer.parseInt(context.getParameter("AGGREGATE")),
 					context.getParameter("QOS"),
 					context.getParameter("RETAINED"),
+					context.getParameter("TIME_STAMP"),
+					context.getParameter("NUMBER_SEQUENCE"),					
 					context.getParameter("TYPE_VALUE"));
 		}
 
 	}
 
 	private void produce(String message, String topic, int aggregate,
-			String qos, String isRetained, String type_value) throws Exception {
+			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value) throws Exception {
 
 		try {
 
@@ -126,54 +134,17 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			boolean retained = false;
 			if ("TRUE".equals(isRetained))
 				retained = true;
+			
 			// Type of value in content of message
 			System.out.println(type_value);
-			if (MQTTPublisherGui.INT.equals(type_value)) {
-
-				int msg = Integer.parseInt(message);
-				for (int i = 0; i < aggregate; ++i) {
-					this.connection.publish(topic, Convert.int2ByteArray(msg),
-							quality, retained).await();
+			System.out.println("TimeStamp "+useTimeStamp);
+			System.out.println("Number Sequence "+useNumberSeq);
+			for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = createPayload(message, useTimeStamp, useNumberSeq, type_value);	
+					this.connection.publish(topic,payload,quality, retained).await();
 					total.incrementAndGet();
 				}
-			} else if (MQTTPublisherGui.LONG.equals(type_value)) {
-				long msg = Long.parseLong(message);
-				for (int i = 0; i < aggregate; ++i) {
-					this.connection.publish(topic, Convert.long2ByteArray(msg),
-							quality, retained).await();
-					total.incrementAndGet();
-				}
-			} else if (MQTTPublisherGui.DOUBLE.equals(type_value)) {
-				double msg = Double.parseDouble(message);
-				for (int i = 0; i < aggregate; ++i) {
-					this.connection.publish(topic,
-							Convert.double2ByteArray(msg), quality, retained)
-							.await();
-					total.incrementAndGet();
-				}
-			} else if (MQTTPublisherGui.FLOAT.equals(type_value)) {
-				float msg = Float.parseFloat(message);
-				for (int i = 0; i < aggregate; ++i) {
-					this.connection.publish(topic,
-							Convert.float2ByteArray(msg), quality, retained)
-							.await();
-					total.incrementAndGet();
-				}
-			} else if (MQTTPublisherGui.STRING.equals(type_value)) {
-				for (int i = 0; i < aggregate; ++i) {
-					this.connection.publish(topic,
-							Convert.string2ByteArray(message), quality,
-							retained).await();
-					total.incrementAndGet();
-				}
-			} else if ("TEXT".equals(type_value)) {
-				for (int i = 0; i < aggregate; ++i) {
-					this.connection.publish(topic,
-							Convert.string2ByteArray(message), quality,
-							retained).await();
-					total.incrementAndGet();
-				}
-			}
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -229,4 +200,48 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			this.connection.disconnect();
 
 	}
+	
+    public byte[] createPayload(String message, String useTimeStamp, String useNumSeq ,String type_value) throws IOException, NumberFormatException {
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		DataOutputStream d = new DataOutputStream(b);
+// flags  	
+    	byte flags=0x00;
+		if("TRUE".equals(useTimeStamp)) flags|=0x80;
+		if("TRUE".equals(useNumSeq)) flags|=0x40;
+		if (MQTTPublisherGui.INT.equals(type_value)) flags|=0x20;
+		if (MQTTPublisherGui.LONG.equals(type_value)) flags|=0x10;
+		if (MQTTPublisherGui.FLOAT.equals(type_value)) flags|=0x08;
+		if (MQTTPublisherGui.DOUBLE.equals(type_value)) flags|=0x04;
+		if (MQTTPublisherGui.STRING.equals(type_value)) flags|=0x02;
+		if(!"TEXT".equals(type_value)){
+			d.writeByte(flags); 
+		}		
+// TimeStamp
+		if("TRUE".equals(useTimeStamp)){
+   		 Date date= new java.util.Date();
+    	 d.writeLong(date.getTime());
+    	 
+    	                                }
+// Number Sequence
+		if("TRUE".equals(useNumSeq)){
+   	     d.writeInt(numSeq++);   	
+   	    
+  	    }
+// Value				
+  	    if (MQTTPublisherGui.INT.equals(type_value)) {
+  			d.writeInt(Integer.parseInt(message));  			
+  		} else if (MQTTPublisherGui.LONG.equals(type_value)) {
+  			d.writeLong(Long.parseLong(message));  		
+  		} else if (MQTTPublisherGui.DOUBLE.equals(type_value)) {
+  			d.writeDouble(Double.parseDouble(message));  		
+  		} else if (MQTTPublisherGui.FLOAT.equals(type_value)) {
+  			d.writeDouble(Float.parseFloat(message));  			
+  		} else if (MQTTPublisherGui.STRING.equals(type_value)) {
+  			d.write(message.getBytes());  			
+  		} else if ("TEXT".equals(type_value)) {
+  			d.write(message.getBytes());
+  		}       	
+		return b.toByteArray();
+	}
+	
 }
