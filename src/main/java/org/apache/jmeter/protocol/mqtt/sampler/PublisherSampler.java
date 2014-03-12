@@ -263,22 +263,24 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			//---------------------Message Choice----------------------------//
 			
 			if(this.getMessageChoice().equals(MQTTPublisherGui.TEXT_MSG_RSC)){
-				String message = getTextMessage();
-				parameters.addArgument("MESSAGE", message);
+		
+				parameters.addArgument("MESSAGE",getTextMessage());
 				parameters.addArgument("TYPE_MESSAGE","TEXT");
 				parameters.addArgument("TYPE_VALUE","TEXT");
 			}
 			else if(this.getMessageChoice().equals(MQTTPublisherGui.FIXED_VALUE)){
-				String message = getFIXED_VALUE();
-				parameters.addArgument("MESSAGE", message);
+			
+				parameters.addArgument("MESSAGE", getFIXED_VALUE());
 				parameters.addArgument("TYPE_MESSAGE","FIXED");
-				String type_value= this.getTYPE_FIXED_VALUE();
-				parameters.addArgument("TYPE_VALUE",type_value);
+				parameters.addArgument("TYPE_VALUE",getTYPE_FIXED_VALUE());
 			}
 			else if(this.getMessageChoice().equals(MQTTPublisherGui.GENERATED_VALUE)){
 				parameters.addArgument("TYPE_MESSAGE","RANDOM");
-				String type_value= this.getTYPE_RANDOM_VALUE();
-				parameters.addArgument("TYPE_VALUE",type_value);
+			    parameters.addArgument("TYPE_VALUE",getTYPE_GENERATED_VALUE());
+				parameters.addArgument("SEED",getSEED());
+				parameters.addArgument("MIN_RANDOM_VALUE",getMIN_RANDOM_VALUE());
+				parameters.addArgument("MAX_RANDOM_VALUE",getMAX_RANDOM_VALUE());
+				parameters.addArgument("TYPE_RANDOM_VALUE",getTYPE_RANDOM_VALUE());
 			}
 			
 			

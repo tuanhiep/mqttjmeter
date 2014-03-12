@@ -6,7 +6,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.security.SecureRandom;
 import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.jmeter.config.Arguments;
@@ -18,13 +20,15 @@ import org.fusesource.mqtt.client.FutureConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 
+
 public class MqttPublisher extends AbstractJavaSamplerClient implements
 		Serializable, Closeable {
 	private static final long serialVersionUID = 1L;
 	private AtomicInteger total = new AtomicInteger(0);
 	private FutureConnection connection;
 	public static int numSeq=0;
-
+	private Random generator = new Random();	
+	private SecureRandom secureGenerator= new SecureRandom(); 
 	// public static void main(String[] args){
 	//
 	// String host = "tcps://localhost:8883";
@@ -66,6 +70,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			this.connection = createConnection(host);
 
 			this.connection.connect().await();
+			
 
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
@@ -101,6 +106,13 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 		} else if ("RANDOM".equals(context.getParameter("TYPE_MESSAGE"))) {
 
+			produceRandomly(context.getParameter("SEED"),context.getParameter("MIN_RANDOM_VALUE"),
+					context.getParameter("MAX_RANDOM_VALUE"),context.getParameter("TYPE_RANDOM_VALUE"),
+					context.getParameter("TOPIC"),Integer.parseInt(context.getParameter("AGGREGATE")),
+					context.getParameter("QOS"),context.getParameter("RETAINED"),
+					context.getParameter("TIME_STAMP"),context.getParameter("NUMBER_SEQUENCE"),
+					context.getParameter("TYPE_VALUE"));
+									
 		} else if ("TEXT".equals(context.getParameter("TYPE_MESSAGE"))) {
 			produce(context.getParameter("MESSAGE"),
 					context.getParameter("TOPIC"),
@@ -152,6 +164,49 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		}
 	}
 
+	public void produceRandomly(String seed, String min, String max, String type_random,String topic, int aggregate,
+			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value){
+		
+
+		try {
+
+			// Quality
+			QoS quality = null;
+			if (MQTTPublisherGui.EXACTLY_ONCE.equals(qos)) {
+				quality = QoS.EXACTLY_ONCE;
+			} else if (MQTTPublisherGui.AT_LEAST_ONCE.equals(qos)) {
+				quality = QoS.AT_LEAST_ONCE;
+			} else if (MQTTPublisherGui.AT_MOST_ONCE.equals(qos)) {
+				quality = QoS.AT_MOST_ONCE;
+
+			}
+
+			// Retained
+			boolean retained = false;
+			if ("TRUE".equals(isRetained))
+				retained = true;
+			
+			// Type of value in content of message
+			System.out.println(type_value);
+			System.out.println("TimeStamp "+useTimeStamp);
+			System.out.println("Number Sequence "+useNumberSeq);
+			for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value);	
+					this.connection.publish(topic,payload,quality, retained).await();
+					total.incrementAndGet();
+				}
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			getLogger().warn(e.getLocalizedMessage(), e);
+		}
+		
+		
+		
+		
+		
+	}
 	public SampleResult runTest(JavaSamplerContext context) {
 		SampleResult result = new SampleResult();
 
@@ -201,7 +256,19 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 	}
 	
-    public byte[] createPayload(String message, String useTimeStamp, String useNumSeq ,String type_value) throws IOException, NumberFormatException {
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public byte[] createPayload(String message, String useTimeStamp, String useNumSeq ,String type_value) throws IOException, NumberFormatException {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream d = new DataOutputStream(b);
 // flags  	
@@ -220,8 +287,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		if("TRUE".equals(useTimeStamp)){
    		 Date date= new java.util.Date();
     	 d.writeLong(date.getTime());
-    	 
-    	                                }
+    	                               }
 // Number Sequence
 		if("TRUE".equals(useNumSeq)){
    	     d.writeInt(numSeq++);   	
@@ -241,6 +307,84 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
   		} else if ("TEXT".equals(type_value)) {
   			d.write(message.getBytes());
   		}       	
+		return b.toByteArray();
+	}
+  
+    
+    
+    
+    public byte[] createRandomPayload(String Seed,String min, String max, String type_random, String useTimeStamp, String useNumSeq ,String type_value) throws IOException, NumberFormatException {
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		DataOutputStream d = new DataOutputStream(b);
+		
+		
+		
+// flags  	
+    	byte flags=0x00;
+		if("TRUE".equals(useTimeStamp)) flags|=0x80;
+		if("TRUE".equals(useNumSeq)) flags|=0x40;
+		if (MQTTPublisherGui.INT.equals(type_value)) flags|=0x20;
+		if (MQTTPublisherGui.LONG.equals(type_value)) flags|=0x10;
+		if (MQTTPublisherGui.FLOAT.equals(type_value)) flags|=0x08;
+		if (MQTTPublisherGui.DOUBLE.equals(type_value)) flags|=0x04;
+		if (MQTTPublisherGui.STRING.equals(type_value)) flags|=0x02;
+		if(!"TEXT".equals(type_value)){
+			d.writeByte(flags); 
+		}		
+// TimeStamp
+		if("TRUE".equals(useTimeStamp)){
+   		 Date date= new java.util.Date();
+    	 d.writeLong(date.getTime());
+    	                               }
+// Number Sequence
+		if("TRUE".equals(useNumSeq)){
+   	     d.writeInt(numSeq++);   	
+   	    
+  	    }
+// Value
+		
+	if(MQTTPublisherGui.PSEUDO.equals(type_random)){
+		    generator.setSeed(Long.parseLong(Seed));
+		    if (MQTTPublisherGui.INT.equals(type_value)) {	  	    	
+	  			d.writeInt(generator.nextInt(Integer.parseInt(max)-Integer.parseInt(min))+Integer.parseInt(min));  
+	   		} else if (MQTTPublisherGui.LONG.equals(type_value)) {	  			
+	  			long Max= Long.parseLong(max);
+	  			long Min= Long.parseLong(min);
+	  			d.writeLong((Math.abs(generator.nextLong() % (Max - Min)) + Min));  		
+	  		} else if (MQTTPublisherGui.DOUBLE.equals(type_value)) {
+	  			double Max= Double.parseDouble(max);
+	  			double Min= Double.parseDouble(min);
+	  	      	d.writeDouble((Min+(Max-Min)*generator.nextDouble()));
+	  		} else if (MQTTPublisherGui.FLOAT.equals(type_value)) {
+	  			float Max= Float.parseFloat(max);
+	  			float Min= Float.parseFloat(min);
+	  			d.writeFloat((Min+(Max-Min)*generator.nextFloat()));			
+	   		} 
+			}
+	else if(MQTTPublisherGui.SECURE.equals(type_random)){
+		
+		 secureGenerator.setSeed(Long.parseLong(Seed));
+		 if (MQTTPublisherGui.INT.equals(type_value)) {	  	    	
+	  			d.writeInt(secureGenerator.nextInt(Integer.parseInt(max)-Integer.parseInt(min))+Integer.parseInt(min));  
+	  			System.out.println(secureGenerator.nextInt(Integer.parseInt(max)-Integer.parseInt(min))+Integer.parseInt(min));
+	   		} else if (MQTTPublisherGui.LONG.equals(type_value)) {	  			
+	  			long Max= Long.parseLong(max);
+	  			long Min= Long.parseLong(min);
+	  			d.writeLong((Math.abs(secureGenerator.nextLong() % (Max - Min)) + Min));  		
+	  		} else if (MQTTPublisherGui.DOUBLE.equals(type_value)) {
+	  			double Max= Double.parseDouble(max);
+	  			double Min= Double.parseDouble(min);
+	  	      	d.writeDouble((Min+(Max-Min)*secureGenerator.nextDouble()));
+	  		} else if (MQTTPublisherGui.FLOAT.equals(type_value)) {
+	  			float Max= Float.parseFloat(max);
+	  			float Min= Float.parseFloat(min);
+	  			d.writeFloat((Min+(Max-Min)*secureGenerator.nextFloat()));			
+	   		} 
+		
+		
+	}
+  	  
+  	    
 		return b.toByteArray();
 	}
 	
