@@ -95,7 +95,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private final JLabeledTextField seed = new JLabeledTextField(JMeterUtils.getResString("mqtt_seed_random")); //$NON-NLS-1$
 	private final JLabel textArea = new JLabel(JMeterUtils.getResString("mqtt_text_area"));
 	private final JTextScrollPane textPanel = new JTextScrollPane(textMessage);
-	
+	private final JLabeledTextField clientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); //$NON-NLS-1$
 	
 	public MQTTPublisherGui() {
 		init();
@@ -107,8 +107,14 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
 		add(mainPanel, BorderLayout.CENTER);
-		mainPanel.add(urlField);
-		mainPanel.add(createDestinationPane());
+
+//-----------------------------------URL/CLIENT_ID---------------------------------------//
+		JPanel DPanel = new JPanel();
+		DPanel.setLayout(new BoxLayout(DPanel, BoxLayout.X_AXIS));
+		DPanel.add(urlField);
+		DPanel.add(clientId);		
+		mainPanel.add(DPanel);
+		mainPanel.add(createDestinationPane());		
 		mainPanel.add(createAuthPane());
 		mainPanel.add(iterations);
 		msgChoice.setLayout(new BoxLayout(msgChoice, BoxLayout.X_AXIS));
@@ -173,6 +179,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		panel.add(mqttDestination, BorderLayout.WEST);
 		destSetup.setLayout(new BoxLayout(destSetup, BoxLayout.X_AXIS));
 		panel.add(destSetup, BorderLayout.CENTER);
+		
 		return panel;
 	}
 
@@ -195,7 +202,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mqttUser.setEnabled(false);
 		mqttPwd.setEnabled(false);
 		destSetup.setText(DEST_SETUP_STATIC);
-		this.textArea.setText("");
+		textArea.setText("");
+	    clientId.setText("");
 		
 	}
 
@@ -220,6 +228,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
         sampler.setSEED(this.seed.getText());
         sampler.setUSE_TIMESTAMP(useTimeStamp.isSelected());
         sampler.setUSE_NUMBER_SEQUENCE(useNumberSeq.isSelected());
+        sampler.setCLIENT_ID(clientId.getText());
 	}
 		
 	

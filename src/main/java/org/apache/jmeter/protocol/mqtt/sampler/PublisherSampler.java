@@ -25,7 +25,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static final String MESSAGE_CHOICE = "mqtt.config_msg_type"; //$NON-NLS-1$
 	private static final String QUALITY = "mqtt.quality"; //$NON-NLS-1$
 	private static final String TYPE_FIXED_VALUE ="mqtt.type_fixed_value"; //$NON-NLS-1$
-	private static boolean  RETAIN = false;
+	private static String CLIENT_ID ="mqtt.clientid";
+	private static boolean RETAIN = false;
 	private static boolean USE_TIMESTAMP= false;
 	private static boolean USE_NUMBER_SEQUENCE= false;
 	private static String  FIXED_VALUE = "mqtt.fixed_value";
@@ -51,14 +52,23 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 
 	// ---------------------Get/Set Property--------------------------//
 	
-	
-	
-	
-    public void setTYPE_FIXED_VALUE(String type) {
+	public void setTYPE_FIXED_VALUE(String type) {
     	setProperty(TYPE_FIXED_VALUE, type);
 		
 	}
-    public  boolean isUSE_TIMESTAMP() {
+   
+
+	
+
+	public  String getCLIENT_ID() {
+		return CLIENT_ID;
+	}
+
+	public  void setCLIENT_ID(String cLIENT_ID) {
+		CLIENT_ID = cLIENT_ID;
+	}
+
+	public  boolean isUSE_TIMESTAMP() {
 		return USE_TIMESTAMP;
 	}
 
@@ -236,7 +246,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			String aggregate = "" + getIterationCount();
 			Arguments parameters = new Arguments();
 			parameters.addArgument("HOST", host);
-			parameters.addArgument("CLIENT_ID", "Hiep");
+			//------------------------ClientId-----------------------------------//
+			parameters.addArgument("CLIENT_ID",getCLIENT_ID());
 			parameters.addArgument("TOPIC", topic);
 			parameters.addArgument("AGGREGATE", aggregate);
 			
@@ -284,10 +295,16 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			}
 			
 			
-			//---------------------------------------------------------------//
+			//-----------------------User/Password-------------------------------//
 			
-			this.context = new JavaSamplerContext(parameters);
-			this.producer.setupTest(this.context);
+				if(this.isUseAuth()) {
+					parameters.addArgument("AUTH","TRUE");
+					parameters.addArgument("USER",getUsername());
+					parameters.addArgument("PASSWORD",getPassword());
+				} else parameters.addArgument("AUTH","FALSE");
+			
+				this.context = new JavaSamplerContext(parameters);
+				this.producer.setupTest(this.context);
 
 	}
 
@@ -301,6 +318,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			try {
 				producer.close();
                 MqttPublisher.numSeq=0;
+                
 			} catch (IOException e) {
 				e.printStackTrace();
 				log.warn(e.getLocalizedMessage(), e);

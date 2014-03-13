@@ -58,16 +58,35 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 	public void setupTest(JavaSamplerContext context) {
 		String host = context.getParameter("HOST");
-		String topic = context.getParameter("TOPIC");
+		String clientId = context.getParameter("CLIENT_ID");
 
-		setupTest(host, topic);
+		if("TRUE".equals(context.getParameter("AUTH"))){			
+		setupTest(host,clientId,context.getParameter("USER"),context.getParameter("PASSWORD"));
+		
+		}
+		else{
+			setupTest(host, clientId);
+		}		
+		
 
 	}
 
-	public void setupTest(String host, String topic) {
+	public void setupTest(String host, String clientId) {
 		try {
 
-			this.connection = createConnection(host);
+			this.connection = createConnection(host,clientId);
+
+			this.connection.connect().await();
+			
+
+		} catch (Exception e) {
+			getLogger().error(e.getMessage());
+		}
+	}
+	public void setupTest(String host, String clientId, String user, String password) {
+		try {
+
+			this.connection = createConnection(host,clientId,user,password);
 
 			this.connection.connect().await();
 			
@@ -77,11 +96,27 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		}
 	}
 
-	private FutureConnection createConnection(String host) {
+	private FutureConnection createConnection(String host,String clientId) {
 
 		try {
 			MQTT client = new MQTT();
 			client.setHost(host);
+			client.setClientId(clientId);
+			return client.futureConnection();
+		} catch (URISyntaxException e) {
+			getLogger().error(e.getMessage());
+			return null;
+		}
+
+	}
+	private FutureConnection createConnection(String host,String clientId,String user, String password) {
+
+		try {
+			MQTT client = new MQTT();
+			client.setHost(host);
+			client.setUserName(user);
+			client.setPassword(password);
+			client.setClientId(clientId);
 			return client.futureConnection();
 		} catch (URISyntaxException e) {
 			getLogger().error(e.getMessage());
