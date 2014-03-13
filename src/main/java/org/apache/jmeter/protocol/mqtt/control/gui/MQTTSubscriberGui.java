@@ -19,15 +19,13 @@
 package org.apache.jmeter.protocol.mqtt.control.gui;
 
 import java.awt.BorderLayout;
-
-import javax.naming.Context;
+import java.awt.Component;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.JLabeledRadioI18N;
 import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.protocol.mqtt.sampler.SubscriberSampler;
@@ -47,7 +45,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
 
     private final JLabeledTextField urlField = new JLabeledTextField(JMeterUtils.getResString("mqtt_provider_url")); // $NON-NLS-1$
     private final JLabeledTextField mqttDestination = new JLabeledTextField(JMeterUtils.getResString("mqtt_topic")); // $NON-NLS-1$
-    private final JLabeledTextField mqttClientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); // $NON-NLS-1$
     private final JLabeledTextField mqttUser = new JLabeledTextField(JMeterUtils.getResString("mqtt_user")); // $NON-NLS-1$
     private final JLabeledTextField mqttPwd = new JLabeledPasswordField(JMeterUtils.getResString("mqtt_pwd")); // $NON-NLS-1$
     private final JLabeledTextField iterations = new JLabeledTextField(JMeterUtils.getResString("mqtt_itertions")); // $NON-NLS-1$
@@ -70,6 +67,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
     // Button group resources
     private static final String[] DEST_SETUP_ITEMS = { DEST_SETUP_STATIC, DEST_SETUP_DYNAMIC };
     private final JLabeledRadioI18N destSetup =  new JLabeledRadioI18N("mqtt_dest_setup", DEST_SETUP_ITEMS, DEST_SETUP_STATIC); // $NON-NLS-1$
+    private final JLabeledTextField clientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); //$NON-NLS-1$
     
     public MQTTSubscriberGui() {
         init();
@@ -101,17 +99,14 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         this.configureTestElement(sampler);
         sampler.setProviderUrl(urlField.getText());
         sampler.setDestination(mqttDestination.getText());
-        sampler.setClientID(mqttClientId.getText());
+        sampler.setClientID(clientId.getText());
         sampler.setUsername(mqttUser.getText());
         sampler.setPassword(mqttPwd.getText());
         sampler.setUseAuth(useAuth.isSelected());
         sampler.setIterations(iterations.getText());
-        sampler.setReadResponse(String.valueOf(readResponse.isSelected()));
-        sampler.setClientChoice(clientChoice.getText());
-        sampler.setStopBetweenSamples(stopBetweenSamples.isSelected());
         sampler.setTimeout(timeout.getText());
         sampler.setDestinationStatic(destSetup.getText().equals(DEST_SETUP_STATIC));
-        sampler.setSeparator(separator.getText());
+
     }
 
     /**
@@ -124,26 +119,32 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         add(makeTitlePanel(), BorderLayout.NORTH);
         JPanel mainPanel = new VerticalPanel();
         add(mainPanel, BorderLayout.CENTER);      
-        urlField.setToolTipText(Context.PROVIDER_URL);
-        mqttUser.setToolTipText(Context.SECURITY_PRINCIPAL);
-        mqttPwd.setToolTipText(Context.SECURITY_CREDENTIALS);
-        mainPanel.add(urlField);
-        mainPanel.add(createDestinationPane());
-        mainPanel.add(mqttClientId);
-        mainPanel.add(useAuth);
-        mainPanel.add(mqttUser);
-        mainPanel.add(mqttPwd);
+        
+        JPanel DPanel = new JPanel();
+		DPanel.setLayout(new BoxLayout(DPanel, BoxLayout.X_AXIS));
+		DPanel.add(urlField);
+		DPanel.add(clientId);		
+		mainPanel.add(DPanel);
+		mainPanel.add(createDestinationPane());
+		mainPanel.add(createAuthPane());
         mainPanel.add(iterations);
-        mainPanel.add(readResponse);
-        mainPanel.add(timeout);        
-        JPanel choice = new HorizontalPanel();
-        choice.add(clientChoice);
-        choice.add(stopBetweenSamples);
-        mainPanel.add(choice);
-        mainPanel.add(separator);           
+        mainPanel.add(timeout);             
         useAuth.addChangeListener(this);
     }
-
+    /**
+	 * 
+	 * @return JPanel Panel with checkbox to choose  user and password
+	 */
+	private Component createAuthPane() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		panel.add(useAuth);
+		panel.add(Box.createHorizontalStrut(10));
+		panel.add(mqttUser);
+		panel.add(Box.createHorizontalStrut(10));
+		panel.add(mqttPwd);
+		return panel;
+	}
     /**
      * the implementation loads the URL and the soap action for the request.
      */
@@ -153,7 +154,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         SubscriberSampler sampler = (SubscriberSampler) el;  
         urlField.setText(sampler.getProviderUrl());        
         mqttDestination.setText(sampler.getDestination());
-        mqttClientId.setText(sampler.getClientId());    
+        clientId.setText(sampler.getClientId());    
         mqttUser.setText(sampler.getUsername());
         mqttPwd.setText(sampler.getPassword());
         iterations.setText(sampler.getIterations());
@@ -161,10 +162,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         mqttUser.setEnabled(useAuth.isSelected());
         mqttPwd.setEnabled(useAuth.isSelected());
         readResponse.setSelected(sampler.getReadResponseAsBoolean());
-        clientChoice.setText(sampler.getClientChoice());
-        stopBetweenSamples.setSelected(sampler.isStopBetweenSamples());
         timeout.setText(sampler.getTimeout());
-        separator.setText(sampler.getSeparator());
         destSetup.setText(sampler.isDestinationStatic() ? DEST_SETUP_STATIC : DEST_SETUP_DYNAMIC);
     }
 
@@ -173,7 +171,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         super.clearGui();
         urlField.setText(""); // $NON-NLS-1$
         mqttDestination.setText(""); // $NON-NLS-1$
-        mqttClientId.setText(""); // $NON-NLS-1$     
+        clientId.setText(""); // $NON-NLS-1$     
         mqttUser.setText(""); // $NON-NLS-1$
         mqttPwd.setText(""); // $NON-NLS-1$
         iterations.setText("1"); // $NON-NLS-1$
@@ -203,8 +201,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
     private JPanel createDestinationPane() {
         JPanel pane = new JPanel(new BorderLayout(3, 0));
         pane.add(mqttDestination, BorderLayout.CENTER);
-        destSetup.setLayout(new BoxLayout(destSetup, BoxLayout.X_AXIS));
-        pane.add(destSetup, BorderLayout.EAST);
         return pane;
     }
 }

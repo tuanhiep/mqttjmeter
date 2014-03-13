@@ -16,9 +16,6 @@ import org.fusesource.mqtt.client.Topic;
 
 public class MqttSubscriber extends AbstractJavaSamplerClient implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	private static final long TIMEOUT = 105000L;
-
 	private FutureConnection connection;
 
 //	public static void main(String[] args){
@@ -50,12 +47,38 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 	}
 
 	public void setupTest(JavaSamplerContext context){
-		setupTest(context.getParameter( "HOST" ),
-				context.getParameter( "TOPIC" ),
-				Boolean.parseBoolean(context.getParameter("DURABLE")),
-				context.getParameter( "CLIENT_ID" ));
+		
+		if("TRUE".equals(context.getParameter("AUTH"))){
+			this.setupTest(context.getParameter( "HOST" ), 
+					context.getParameter( "TOPIC" ),
+					Boolean.parseBoolean(context.getParameter("DURABLE")), 
+					context.getParameter( "CLIENT_ID" ),
+					context.getParameter("USER"),
+					context.getParameter("PASSWORD"));
+			
+		}
+		else {
+			setupTest(context.getParameter( "HOST" ),
+					context.getParameter( "TOPIC" ),
+					Boolean.parseBoolean(context.getParameter("DURABLE")),
+					context.getParameter( "CLIENT_ID" ));
+		}
+		
+		
 	}
+	private void setupTest(String host, String topic, boolean durable, String clientId,String user, String password){
+		try {
 
+			this.connection = createConnection(host, clientId, durable,user,password);
+
+			this.connection.connect().await();
+
+			this.connection.subscribe(new Topic[]{new Topic(topic, QoS.EXACTLY_ONCE)}).await();
+
+		} catch (Exception e) {
+			getLogger().error(e.getMessage());
+		}
+	}
 	private void setupTest(String host, String topic, boolean durable, String clientId){
 		try {
 
@@ -80,21 +103,32 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 		return client.futureConnection();
 
 	}
+	private FutureConnection createConnection(String host, String clientId, boolean durable,String user,String password)
+			throws URISyntaxException{
 
+		MQTT client = new MQTT();
+		client.setHost(host);
+		client.setClientId(clientId);
+		client.setUserName(user);
+		client.setPassword(password);
+		client.setCleanSession(!durable);
+		return client.futureConnection();
+
+	}
 	private void consume(JavaSamplerContext context) throws Exception{
-		consume(Integer.parseInt(context.getParameter("AGGREGATE")));
+		consume(Integer.parseInt(context.getParameter("AGGREGATE")),Long.parseLong(context.getParameter("TIMEOUT")));
 	}
 
-	private void consume(int aggregate) throws Exception{
+	private void consume(int aggregate,long timeout) throws Exception{
 
 		for(int i = 1; i <= aggregate; ++i){
-			Message msg = connection.receive().await(TIMEOUT, TimeUnit.MILLISECONDS);
+			Message msg = connection.receive().await(timeout, TimeUnit.MILLISECONDS);
 			if(msg == null){
 				getLogger().error("MQTT consumer timed out while waiting for a message. The test has been aborted.");
 				return;
 			}
 			msg.ack();
-//			System.out.println(new String(msg.getPayload()));
+			System.out.println(new String(msg.getPayload()));
 			getLogger().debug("consumed " + i);
 		}
 	}

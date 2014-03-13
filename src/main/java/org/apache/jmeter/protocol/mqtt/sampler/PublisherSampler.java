@@ -220,7 +220,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private void logThreadStart() {
 		if (log.isDebugEnabled()) {
 			log.debug("Thread started " + new Date());
-			log.debug("MQTTSampler: [" + Thread.currentThread().getName()
+			log.debug("MQTT PublishSampler: [" + Thread.currentThread().getName()
 					+ "], hashCode=[" + hashCode() + "]");
 
 		}

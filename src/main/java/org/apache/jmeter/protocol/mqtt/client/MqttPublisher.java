@@ -183,9 +183,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 				retained = true;
 			
 			// Type of value in content of message
-			System.out.println(type_value);
-			System.out.println("TimeStamp "+useTimeStamp);
-			System.out.println("Number Sequence "+useNumberSeq);
+			
 			for (int i = 0; i < aggregate; ++i) {
 					byte[] payload = createPayload(message, useTimeStamp, useNumberSeq, type_value);	
 					this.connection.publish(topic,payload,quality, retained).await();
@@ -222,9 +220,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 				retained = true;
 			
 			// Type of value in content of message
-			System.out.println(type_value);
-			System.out.println("TimeStamp "+useTimeStamp);
-			System.out.println("Number Sequence "+useNumberSeq);
+			
 			for (int i = 0; i < aggregate; ++i) {
 					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value);	
 					this.connection.publish(topic,payload,quality, retained).await();
@@ -401,8 +397,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		 secureGenerator.setSeed(Long.parseLong(Seed));
 		 if (MQTTPublisherGui.INT.equals(type_value)) {	  	    	
 	  			d.writeInt(secureGenerator.nextInt(Integer.parseInt(max)-Integer.parseInt(min))+Integer.parseInt(min));  
-	  			System.out.println(secureGenerator.nextInt(Integer.parseInt(max)-Integer.parseInt(min))+Integer.parseInt(min));
-	   		} else if (MQTTPublisherGui.LONG.equals(type_value)) {	  			
+	  		} else if (MQTTPublisherGui.LONG.equals(type_value)) {	  			
 	  			long Max= Long.parseLong(max);
 	  			long Min= Long.parseLong(min);
 	  			d.writeLong((Math.abs(secureGenerator.nextLong() % (Max - Min)) + Min));  		
