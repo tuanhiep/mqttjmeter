@@ -123,7 +123,7 @@ For mesuring, thanks to Jmeter, we can add some listeners:
 ## MQTT Subscriber  
  
  
-![Alt text](images/MQTT_Subcriber.png)  
+![Alt text](images/MQTT_Subscriber.png)  
  
  
  
@@ -139,10 +139,10 @@ For mesuring, thanks to Jmeter, we can add some listeners:
 the topic in one session  
 *Time out (milliseconds):* Timeout for the connection to receive message from the topic  
 
-![Alt text](images/Subcriber_result.png)  
+![Alt text](images/Subscriber_result.png)  
  
  
-![Alt text](images/Publisher_Subcriber.png)  
+![Alt text](images/Publisher_Subscriber.png)  
   
   
   
