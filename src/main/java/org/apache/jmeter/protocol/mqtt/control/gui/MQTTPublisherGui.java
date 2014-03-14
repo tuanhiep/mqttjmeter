@@ -21,7 +21,7 @@ import org.apache.jorphan.gui.JLabeledPasswordField;
 import org.apache.jorphan.gui.JLabeledTextField;
 
 /**
- * @author strongman
+ * @author Tuan Hiep
  * 
  */
 public class MQTTPublisherGui extends AbstractSamplerGui implements
@@ -71,7 +71,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private static final String[] VALTYPES_ITEMS = { INT,LONG,FLOAT,DOUBLE};
 	private static final String[] FVALTYPES_ITEMS = {INT,LONG,FLOAT,DOUBLE,STRING};
 	private static final String[] RANTYPES_ITEMS = {PSEUDO,SECURE};
-	private static final String[] QTYPES_ITEMS = {EXACTLY_ONCE,AT_LEAST_ONCE,AT_MOST_ONCE};
+	private static final String[] QTYPES_ITEMS = {AT_MOST_ONCE,AT_LEAST_ONCE,EXACTLY_ONCE};
 	private final JLabeledTextField urlField = new JLabeledTextField(JMeterUtils.getResString("mqtt_provider_url")); //$NON-NLS-1$
 	private final JLabeledTextField mqttDestination = new JLabeledTextField(JMeterUtils.getResString("mqtt_topic")); //$NON-NLS-1$
 	private final JCheckBox useAuth = new JCheckBox(JMeterUtils.getResString("mqtt_use_auth"), false); //$NON-NLS-1$
@@ -85,7 +85,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private final JCheckBox useTimeStamp = new JCheckBox(JMeterUtils.getResString("mqtt_use_time_stamp"), false); // $NON-NLS-1$
 	private final JCheckBox useNumberSeq = new JCheckBox(JMeterUtils.getResString("mqtt_use_number_seq"), false); // $NON-NLS-1$
 	private final JCheckBox isRetained = new JCheckBox(JMeterUtils.getResString("mqtt_send_as_retained_msg"), false); // $NON-NLS-1$
-	private final JLabeledRadioI18N typeQoSValue = new JLabeledRadioI18N("mqtt_qos", QTYPES_ITEMS,EXACTLY_ONCE); //$NON-NLS-1$
+	private final JLabeledRadioI18N typeQoSValue = new JLabeledRadioI18N("mqtt_qos", QTYPES_ITEMS,AT_MOST_ONCE); //$NON-NLS-1$
 	private final JLabeledRadioI18N typeGeneratedValue = new JLabeledRadioI18N("mqtt_type_of_generated_value", VALTYPES_ITEMS,INT); //$NON-NLS-1$
 	private final JLabeledRadioI18N typeFixedValue = new JLabeledRadioI18N("mqtt_type_of_fixed_value", FVALTYPES_ITEMS,INT); //$NON-NLS-1$
 	private final JLabeledTextField min = new JLabeledTextField(JMeterUtils.getResString("mqtt_min_value")); //$NON-NLS-1$
