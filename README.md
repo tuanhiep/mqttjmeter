@@ -91,4 +91,26 @@ With MQTT Publisher in Jmeter, three type of messages can be sent (Message Type)
 text.  
 
 ![Alt text](images/Publisher_Text.png)  
-![Alt text](images/Receive.png) 
+ 
+![Alt text](images/Receive.png)  
+
+1 byte “flag header” for the messages of type: Generated value, Fixed value  
+
+![Alt text](images/Flag_Header.png)  
+In the flag header, if one field is set to 1, it means, we use the header in the message.
+For example: With this flag header  
+
+![Alt text](images/Flag_Header_Example.png)  
+It means that, in the message, we have :  
+![Alt text](images/Message.png)  
+
+*Generated Value:*  
+The generated value can be of type: Integer, Long, Float, Double within the range [Min,Max] .
+The type of random can be: Pseudo random or Secure random. In the two cases, we can set the Seed
+for the generator.
+![Alt text](images/Publisher_generated_value.png)  
+*Fixed Value:*  
+The fixed value can be of type: Integer, Long, Float, Double, String within the range [Min,Max].  
+![Alt text](images/Publisher_fixed_value.png)
+For mesuring, thanks to Jmeter, we can add some listeners:  
+![Alt text](images/Publisher_result.png)  
