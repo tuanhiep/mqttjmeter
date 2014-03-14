@@ -47,15 +47,15 @@ In the principal interface of MQTT Publisher we have the fields:
 
 Name : Name of the MQTT Publisher  
 Comments: Your comments  
-Provider URL: the address of MQTT server example: tcp://localhost:1883
-Client Id: Your Id in the session with MQTT server example: Noel De Palma
+Provider URL: the address of MQTT server example: tcp://localhost:1883  
+Client Id: Your Id in the session with MQTT server example: Noel De Palma  
 Topic: The topic's name you want to publish
 Use Authorization check box : Necessary in the case the connection needs the username and
-password
-User: Your username
-Password: Your password
+password  
+User: Your username  
+Password: Your password  
 Number of samples to aggregate : In other way, the number of messages you want to publish to
-the MQTT sever in this MQTT Publisher thread, with the value like the configuration below.
+the MQTT sever in this MQTT Publisher thread, with the value like the configuration below.  
 Message Type: You can choose : Text, Generated Value, Fixed Value (more detail below)
 
 
