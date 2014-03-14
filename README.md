@@ -86,5 +86,9 @@ may be lost. At the other end of the scale is a QoS of 2, "Exactly Once", which 
 exchanges, first to transfer the message and then to ensure only one copy has been received and is
 being processed. This does make Exactly Once the slower but most reliable QoS setting.
 
+With MQTT Publisher in Jmeter, three type of messages can be sent (Message Type):  
+*Text:* The text message, without flag header and the server MQTT can deliver it like a normal
+text.  
 
-
+![Alt text](images/Publisher_Text.png)  
+![Alt text](images/Receive.png) 
