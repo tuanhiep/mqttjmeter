@@ -198,8 +198,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private Component createDestinationPane() {
 		JPanel panel = new JPanel(new BorderLayout(3, 0));
 		panel.add(mqttDestination);
-//		destSetup.setLayout(new BoxLayout(destSetup, BoxLayout.X_AXIS));
-////		panel.add(destSetup, BorderLayout.CENTER);
+
 		
 		return panel;
 	}
