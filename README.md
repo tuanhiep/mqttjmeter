@@ -107,10 +107,17 @@ It means that, in the message, we have :
 *Generated Value:*  
 The generated value can be of type: Integer, Long, Float, Double within the range [Min,Max] .
 The type of random can be: Pseudo random or Secure random. In the two cases, we can set the Seed
-for the generator.
+for the generator.  
+
 ![Alt text](images/Publisher_generated_value.png)  
+  
 *Fixed Value:*  
 The fixed value can be of type: Integer, Long, Float, Double, String within the range [Min,Max].  
-![Alt text](images/Publisher_fixed_value.png)
+  
+![Alt text](images/Publisher_fixed_value.png)  
+
 For mesuring, thanks to Jmeter, we can add some listeners:  
+  
 ![Alt text](images/Publisher_result.png)  
+
+  
