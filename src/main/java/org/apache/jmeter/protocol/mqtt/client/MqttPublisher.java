@@ -29,21 +29,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	public static int numSeq=0;
 	private Random generator = new Random();	
 	private SecureRandom secureGenerator= new SecureRandom(); 
-	// public static void main(String[] args){
-	//
-	// String host = "tcps://localhost:8883";
-	// String topic = "TEST.MQTT";
-	// String message = "This is my test messsage.";
-	// int aggregate = 10000;
-	// MqttPublisher producer = new MqttPublisher();
-	//
-	// try {
-	// producer.setupTest(host, topic);
-	// producer.produce(message, topic, aggregate);
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	// }
+
 
 	@Override
 	public Arguments getDefaultParameters() {

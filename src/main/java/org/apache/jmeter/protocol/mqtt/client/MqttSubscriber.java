@@ -18,21 +18,6 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 	private static final long serialVersionUID = 1L;
 	private FutureConnection connection;
 
-//	public static void main(String[] args){
-//		String host = "tcp://localhost:1883";
-//		String topic = "TEST.MQTT";
-//		String clientId = "me";
-//		boolean durable = false;
-//		int aggregate = 1000;
-//
-//		MqttSubscriber consumer = new MqttSubscriber();
-//		try {
-//			consumer.setupTest(host, topic, durable, clientId);
-//			consumer.consume(aggregate);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 
 	@Override
