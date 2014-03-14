@@ -45,8 +45,8 @@ Right-click “Thread” and choose : Add → Sampler → MQTT Publisher
 
 In the principal interface of MQTT Publisher we have the fields:
 
-Name : Name of the MQTT Publisher
-Comments: Your comments
+Name : Name of the MQTT Publisher  
+Comments: Your comments  
 Provider URL: the address of MQTT server example: tcp://localhost:1883
 Client Id: Your Id in the session with MQTT server example: Noel De Palma
 Topic: The topic's name you want to publish
