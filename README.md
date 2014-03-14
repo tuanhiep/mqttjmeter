@@ -28,7 +28,7 @@ Put the **mqtt-jemeter.jar** in the folder **lib/ext** of Jmeter
 
 Remind that, it's necessary to update the file **ApacheJMeter_core.jar** in the repository lib/ext of Jmeter.
 Update the file messages.properties in the folder :/org/apache/jmeter/resources/
-in ApacheJMeter_core.jar by new file messages.properties from
+in **ApacheJMeter_core.jar** by new file messages.properties from
 https://github.com/tuanhiep/mqtt-jmeter/tree/master/ressource
 
 #  How to use MQTT plugin in Jmeter
@@ -120,4 +120,36 @@ For mesuring, thanks to Jmeter, we can add some listeners:
   
 ![Alt text](images/Publisher_result.png)  
 
+ ## MQTT Subscriber  
+ 
+ 
+ ![Alt text](images/MQTT_Subcriber.png)  
+ 
+ 
+ 
+*Name:* Name of the MQTT Subscriber  
+*Comments:* Your comments  
+*Provider URL:* The address of MQTT server  
+*Client Id:* Your Id in the session  
+*Topic:* The topic you want to subscribe.  
+*Use Authorization :* Necessary in the case the connection need username and password  
+*User:* your username  
+*Password:* your password  
+*Number of samples to aggregate:* In other way, the number of message you want to receive from
+the topic in one session  
+*Time out (milliseconds):* Timeout for the connection to receive message from the topic  
+
+ ![Alt text](images/Subcriber_result.png)  
+ 
+ 
+  ![Alt text](images/Publisher_Subcriber.png)  
   
+  
+  
+  Grenoble, France 14/03/2014,
+  
+  ERODS Team
+  
+  http://www.liglab.fr/erods?lang=fr&var_mode=calcul 
+  
+    
