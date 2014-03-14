@@ -37,6 +37,5 @@ https://github.com/tuanhiep/mqtt-jmeter/tree/master/ressource
 
 The interface graphic of Jmeter:
 
-<img src="images/toto.png" alt="" />
-![Alt text](images/img.jpg)
+![Alt text](images/MQTT_Publisher.png)
 
