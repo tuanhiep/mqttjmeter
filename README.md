@@ -75,11 +75,11 @@ broker or clients create a new subscription they get all the relevant retained m
 1 : At least once  
 2 : Exactly once  
 Each message in MQTT can have its quality of service and retain flag set. The quality of service
-advises the code if and how it should ensure the message arrives. There are three options, 0 (At Most
-Once),1 (At Least Once) and 2 (Exactly Once). By default, a new message instance is set to "At Least Once", 
-a Quality of Service (QoS) of 1, which means the sender will deliver the message at least once and, 
-if there's no acknowledgement of it, it will keep sending it with a duplicate flag set until an acknowledgement 
-turns up, at which point the client removes the message from its persisted set of messages.  
+advises the code if and how it should ensure the message arrives. There are three options, 0 (At Most Once),
+1 (At Least Once) and 2 (Exactly Once). By default, a new message instance is set to "At Least Once",a Quality 
+of Service (QoS) of 1, which means the sender will deliver the message at least once and, if there's no acknowledgement
+ of it, it will keep sending it with a duplicate flag set until an acknowledgement turns up, at which point the
+client removes the message from its persisted set of messages.  
 A QoS of 0, "At Most Once", is the fastest mode, where the client doesn't wait for an
 acknowledgement. This means, of course, that if there’s a disconnection or server failure, a message
 may be lost. At the other end of the scale is a QoS of 2, "Exactly Once", which uses two pairs of
