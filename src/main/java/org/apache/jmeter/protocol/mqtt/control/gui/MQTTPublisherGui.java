@@ -22,14 +22,21 @@
 
 package org.apache.jmeter.protocol.mqtt.control.gui;
 import java.awt.BorderLayout;
+import java.awt.Choice;
+import java.awt.Color;
 import java.awt.Component;
+
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.apache.jmeter.gui.util.JLabeledRadioI18N;
 import org.apache.jmeter.gui.util.JSyntaxTextArea;
 import org.apache.jmeter.gui.util.JTextScrollPane;
@@ -85,10 +92,16 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	public static final String EXACTLY_ONCE = "mqtt_extactly_once";// $NON-NLS-1$
 	public static final String AT_LEAST_ONCE = "mqtt_at_least_once";// $NON-NLS-1$
 	public static final String AT_MOST_ONCE = "mqtt_at_most_once";// $NON-NLS-1$
+	public static final String PLAIN_TEXT = "mqtt_plain_text";// $NON-NLS-1$
+	public static final String BASE64 = "mqtt_base64";// $NON-NLS-1$
+	public static final String BINHEX = "mqtt_binhex";// $NON-NLS-1$
+	public static final String BINARY = "mqtt_binary";// $NON-NLS-1$
+	
 	// Button group resources
 	private static final String[] DEST_SETUP_ITEMS = { DEST_SETUP_STATIC,DEST_SETUP_DYNAMIC };
 	private final JLabeledRadioI18N destSetup = new JLabeledRadioI18N("mqtt_dest_setup", DEST_SETUP_ITEMS, DEST_SETUP_STATIC); // $NON-NLS-1$
 	private static final String[] MSGTYPES_ITEMS = { TEXT_MSG_RSC,GENERATED_VALUE,FIXED_VALUE };
+	private static final String[] MSGFORMAT_ITEMS = {BINARY,BASE64,BINHEX,PLAIN_TEXT};
 	private static final String[] VALTYPES_ITEMS = { INT,LONG,FLOAT,DOUBLE};
 	private static final String[] FVALTYPES_ITEMS = {INT,LONG,FLOAT,DOUBLE,STRING};
 	private static final String[] RANTYPES_ITEMS = {PSEUDO,SECURE};
@@ -101,7 +114,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private final JLabeledTextField iterations = new JLabeledTextField(	JMeterUtils.getResString("mqtt_itertions")); //$NON-NLS-1$
 	private final JSyntaxTextArea textMessage = new JSyntaxTextArea(10, 50); // $NON-NLS-1$
 	private final JLabeledRadioI18N msgChoice = new JLabeledRadioI18N("mqtt_message_type", MSGTYPES_ITEMS, TEXT_MSG_RSC); //$NON-NLS-1$
-
+	private final JLabeledRadioI18N msgFormat = new JLabeledRadioI18N("mqtt_message_format", MSGFORMAT_ITEMS, BINARY); //$NON-NLS-1$
 	// For messages content
 	private final JCheckBox useTimeStamp = new JCheckBox(JMeterUtils.getResString("mqtt_use_time_stamp"), false); // $NON-NLS-1$
 	private final JCheckBox useNumberSeq = new JCheckBox(JMeterUtils.getResString("mqtt_use_number_seq"), false); // $NON-NLS-1$
@@ -127,6 +140,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		setBorder(makeBorder());
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
+		//mainPanel.setAlignmentX(LEFT_ALIGNMENT);
 		add(mainPanel, BorderLayout.CENTER);
 
 //-----------------------------------URL/CLIENT_ID---------------------------------------//
@@ -138,19 +152,39 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mainPanel.add(createDestinationPane());		
 		mainPanel.add(createAuthPane());
 		mainPanel.add(iterations);
-		msgChoice.setLayout(new BoxLayout(msgChoice, BoxLayout.X_AXIS));
-		mainPanel.add(msgChoice);
+//---------------------------------------Message Format----------------------------------//
+				JPanel FormatPanel = new JPanel();
+				String[] petStrings = { "Bird", "Cat", "Dog", "Rabbit", "Pig" };
+				JComboBox CharsetChooser =new JComboBox(petStrings);
+				msgFormat.setLayout(new BoxLayout(msgFormat, BoxLayout.X_AXIS));
+				FormatPanel.add(msgFormat);
+				FormatPanel.add(CharsetChooser);
+				mainPanel.add(FormatPanel, BorderLayout.WEST);
+		
+//_____________________________ For content of message _________________________________//
+		
+		
 		mainPanel.add(useTimeStamp);
 		mainPanel.add(useNumberSeq);
 		mainPanel.add(isRetained);
 //---------------------------------------QoS --------------------------------------------//
-		this.typeQoSValue.setLayout(new BoxLayout(typeQoSValue, BoxLayout.X_AXIS));
-		mainPanel.add(this.typeQoSValue);
+		typeQoSValue.setLayout(new BoxLayout(typeQoSValue, BoxLayout.X_AXIS));
+		mainPanel.add(this.typeQoSValue);	
+
+
+		
+//		mainPanel.add(msgFormat);
+//		mainPanel.add(CharsetChooser);
+		
+//--------------------------------------Message Type-------------------------------------//		
+		msgChoice.setLayout(new BoxLayout(msgChoice, BoxLayout.X_AXIS));
+		mainPanel.add(msgChoice);
 //----------------------------------Fixed Value Panel------------------------------------//	
 		JPanel FPanel = new JPanel();
 		typeFixedValue.setLayout(new BoxLayout(typeFixedValue, BoxLayout.Y_AXIS));
 		FPanel.add(typeFixedValue);
 		FPanel.add(value);
+		FPanel.setBorder(BorderFactory.createLineBorder(Color.green));
 		mainPanel.add(FPanel);
 		
 //----------------------------------Generated Value Panel--------------------------------//		
@@ -164,6 +198,9 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		GPanel.add(seed);
 		mainPanel.add(GPanel);
 //---------------------------------------------------------------------------------------//
+		
+		
+		 
 		JPanel messageContentPanel = new JPanel(new BorderLayout());
 		messageContentPanel.add(this.textArea,	BorderLayout.NORTH);
 		messageContentPanel.add(this.textPanel,BorderLayout.CENTER);
