@@ -22,21 +22,18 @@
 
 package org.apache.jmeter.protocol.mqtt.control.gui;
 import java.awt.BorderLayout;
-import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Component;
-
+import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import org.apache.jmeter.gui.util.JLabeledRadioI18N;
 import org.apache.jmeter.gui.util.JSyntaxTextArea;
 import org.apache.jmeter.gui.util.JTextScrollPane;
@@ -65,6 +62,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private static final String USE_TEXT_RSC = "mqtt_use_text"; //$NON-NLS-1$
 	/** Create a TextMessage */
 	public static final String TEXT_MSG_RSC = "mqtt_text_message"; //$NON-NLS-1$
+	/** Create a big volume message */
+	public static final String BIG_VOLUME = "mqtt_big_volume"; //$NON-NLS-1$
 	/** Create a MapMessage */
 	public static final String MAP_MSG_RSC = "mqtt_map_message"; //$NON-NLS-1$
 	/** Create an ObjectMessage */
@@ -100,7 +99,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	// Button group resources
 	private static final String[] DEST_SETUP_ITEMS = { DEST_SETUP_STATIC,DEST_SETUP_DYNAMIC };
 	private final JLabeledRadioI18N destSetup = new JLabeledRadioI18N("mqtt_dest_setup", DEST_SETUP_ITEMS, DEST_SETUP_STATIC); // $NON-NLS-1$
-	private static final String[] MSGTYPES_ITEMS = { TEXT_MSG_RSC,GENERATED_VALUE,FIXED_VALUE };
+	private static final String[] MSGTYPES_ITEMS = { TEXT_MSG_RSC,GENERATED_VALUE,FIXED_VALUE,BIG_VOLUME };
 	private static final String[] MSGFORMAT_ITEMS = {BINARY,BASE64,BINHEX,PLAIN_TEXT};
 	private static final String[] VALTYPES_ITEMS = { INT,LONG,FLOAT,DOUBLE};
 	private static final String[] FVALTYPES_ITEMS = {INT,LONG,FLOAT,DOUBLE,STRING};
@@ -130,6 +129,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private final JLabel textArea = new JLabel(JMeterUtils.getResString("mqtt_text_area"));
 	private final JTextScrollPane textPanel = new JTextScrollPane(textMessage);
 	private final JLabeledTextField clientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); //$NON-NLS-1$
+	private  JComboBox<Object> CharsetChooser =new JComboBox<Object>(new String[] { "UTF-8", "UTF-16", "ASC-II"});
 	
 	public MQTTPublisherGui() {
 		init();
@@ -140,53 +140,49 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		setBorder(makeBorder());
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
-		//mainPanel.setAlignmentX(LEFT_ALIGNMENT);
 		add(mainPanel, BorderLayout.CENTER);
-
 //-----------------------------------URL/CLIENT_ID---------------------------------------//
 		JPanel DPanel = new JPanel();
 		DPanel.setLayout(new BoxLayout(DPanel, BoxLayout.X_AXIS));
 		DPanel.add(urlField);
 		DPanel.add(clientId);		
-		mainPanel.add(DPanel);
-		mainPanel.add(createDestinationPane());		
-		mainPanel.add(createAuthPane());
-		mainPanel.add(iterations);
+		JPanel ControlPanel = new VerticalPanel();
+		ControlPanel.add(DPanel);
+		ControlPanel.add(createDestinationPane());
+		ControlPanel.add(createAuthPane());
+		ControlPanel.add(iterations);
+		ControlPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection Info"));
+		mainPanel.add(ControlPanel);		
 //---------------------------------------Message Format----------------------------------//
-				JPanel FormatPanel = new JPanel();
-				String[] petStrings = { "Bird", "Cat", "Dog", "Rabbit", "Pig" };
-				JComboBox CharsetChooser =new JComboBox(petStrings);
-				msgFormat.setLayout(new BoxLayout(msgFormat, BoxLayout.X_AXIS));
-				FormatPanel.add(msgFormat);
-				FormatPanel.add(CharsetChooser);
-				mainPanel.add(FormatPanel, BorderLayout.WEST);
-		
-//_____________________________ For content of message _________________________________//
-		
-		
-		mainPanel.add(useTimeStamp);
-		mainPanel.add(useNumberSeq);
-		mainPanel.add(isRetained);
-//---------------------------------------QoS --------------------------------------------//
+		JPanel FormatPanel = new JPanel();
+		FormatPanel.setLayout(new BoxLayout(FormatPanel, BoxLayout.X_AXIS));
+		msgFormat.setLayout(new BoxLayout(msgFormat, BoxLayout.X_AXIS));
+		FormatPanel.add(msgFormat);
+		Dimension minSize = new Dimension(10, 15);
+		Dimension prefSize = new Dimension(10, 15);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 100);
+		FormatPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+		FormatPanel.add(CharsetChooser);
+		mainPanel.add(FormatPanel);		
+		JPanel StampPanel = new VerticalPanel();
+		StampPanel.add(useTimeStamp);
+		StampPanel.add(useNumberSeq);
+		StampPanel.add(isRetained);
 		typeQoSValue.setLayout(new BoxLayout(typeQoSValue, BoxLayout.X_AXIS));
-		mainPanel.add(this.typeQoSValue);	
-
-
-		
-//		mainPanel.add(msgFormat);
-//		mainPanel.add(CharsetChooser);
-		
+		StampPanel.add(this.typeQoSValue);	
+		StampPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Option"));
+		mainPanel.add(StampPanel);		
 //--------------------------------------Message Type-------------------------------------//		
+		JPanel ContentPanel = new VerticalPanel();		
 		msgChoice.setLayout(new BoxLayout(msgChoice, BoxLayout.X_AXIS));
-		mainPanel.add(msgChoice);
+		ContentPanel.add(msgChoice);
+
 //----------------------------------Fixed Value Panel------------------------------------//	
 		JPanel FPanel = new JPanel();
 		typeFixedValue.setLayout(new BoxLayout(typeFixedValue, BoxLayout.Y_AXIS));
 		FPanel.add(typeFixedValue);
 		FPanel.add(value);
-		FPanel.setBorder(BorderFactory.createLineBorder(Color.green));
-		mainPanel.add(FPanel);
-		
+		ContentPanel.add(FPanel);		
 //----------------------------------Generated Value Panel--------------------------------//		
 		JPanel GPanel = new JPanel();
 		typeGeneratedValue.setLayout(new BoxLayout(typeGeneratedValue, BoxLayout.Y_AXIS));
@@ -196,20 +192,21 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		this.typeRandom.setLayout(new BoxLayout(typeRandom, BoxLayout.Y_AXIS));
 		GPanel.add(typeRandom);
 		GPanel.add(seed);
-		mainPanel.add(GPanel);
-//---------------------------------------------------------------------------------------//
-		
-		
+		ContentPanel.add(GPanel);
+//-------------------------------------Content Panel ------------------------------------//		
 		 
 		JPanel messageContentPanel = new JPanel(new BorderLayout());
 		messageContentPanel.add(this.textArea,	BorderLayout.NORTH);
 		messageContentPanel.add(this.textPanel,BorderLayout.CENTER);
-		mainPanel.add(messageContentPanel);
+		ContentPanel.add(messageContentPanel);
+		ContentPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Content"));
+		mainPanel.add(ContentPanel);
 		useAuth.addChangeListener(this);
         msgChoice.addChangeListener(this);
 		typeFixedValue.addChangeListener(this);
 		typeQoSValue.addChangeListener(this);
 		typeRandom.addChangeListener(this);
+		msgFormat.addChangeListener(this);
 	
 	}
 
@@ -235,9 +232,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private Component createDestinationPane() {
 		JPanel panel = new JPanel(new BorderLayout(3, 0));
 		panel.add(mqttDestination);
-
-		
-		return panel;
+      	return panel;
 	}
 
 	/**
@@ -309,6 +304,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		mqttPwd.setEnabled(useAuth.isSelected());
 		destSetup.setText(sampler.isDestinationStatic() ? DEST_SETUP_STATIC	: DEST_SETUP_DYNAMIC);
 		updateChoice(msgChoice.getText());
+		updateChoice(msgFormat.getText());
 	
 	}
 	
@@ -361,7 +357,9 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			mqttUser.setEnabled(useAuth.isSelected());
 			mqttPwd.setEnabled(useAuth.isSelected());
 		} 
-
+		else if (event.getSource()==msgFormat){
+			updateChoice(msgFormat.getText());
+		}
 	}
 
 	/**
@@ -382,9 +380,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			this.seed.setVisible(false);
 			this.textArea.setVisible(true);
 			this.textPanel.setVisible(true);
-			
-			
-										}
+													}
 		else if(GENERATED_VALUE.equals(command)) {
 
 			this.typeFixedValue.setVisible(false);
@@ -408,8 +404,32 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			this.seed.setVisible(false);
 			this.textArea.setVisible(false);
 			this.textPanel.setVisible(false);
-											}				
+											}
+		else if(BIG_VOLUME.equals(command)){
+			this.typeGeneratedValue.setVisible(false);
+			this.typeFixedValue.setVisible(false);
+			this.max.setVisible(false);
+			this.min.setVisible(false);
+			this.value.setVisible(false);
+			this.typeRandom.setVisible(false);
+			this.seed.setVisible(false);
+			this.textArea.setVisible(false);
+			this.textPanel.setVisible(false);
+		}
+		else if(BINARY.equals(command)){
+			this.CharsetChooser.setVisible(false);
+		}
+		else if(BINHEX.equals(command)){
+			this.CharsetChooser.setVisible(false);
+		}
+		else if(BASE64.equals(command)){
+			this.CharsetChooser.setVisible(false);
+		}
+		else if(PLAIN_TEXT.equals(command)){			
+			this.CharsetChooser.setVisible(true);			
+		}
 		validate();
 	}
 
 }
+ 
