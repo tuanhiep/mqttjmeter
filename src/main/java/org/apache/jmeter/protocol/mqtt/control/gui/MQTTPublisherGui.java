@@ -278,6 +278,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		destSetup.setText(DEST_SETUP_STATIC);
 		textArea.setText("");
 	    clientId.setText("");
+	    connectionPerTopic.setSelected(false);
 	   
 		
 	}
@@ -307,6 +308,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
         sampler.setFORMAT(msgFormat.getText());
         sampler.setCHARSET((String) this.CharsetChooser.getSelectedItem());
         sampler.setSIZE_ARRAY(this.sizeArray.getText());
+        sampler.setSTRATEGY(this.topicChoice.getText());
+        sampler.setOneConnectionPerTopic(this.connectionPerTopic.isSelected());
 	}
 		
 	

@@ -58,6 +58,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static String FORMAT="mqtt.format";
 	private static String CHARSET="mqtt.charset";
 	private static String SIZE_ARRAY="mqtt.size_array";
+	private static String STRATEGY="mqtt.strategy";
+	private static boolean oneConnectionPerTopic = false;
 	public transient MqttPublisher producer = null;
 	
 	// These static variables are only used to convert existing files
@@ -82,7 +84,23 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
     	setProperty(TYPE_FIXED_VALUE, type);
 		
 	}
-   	public  String getSIZE_ARRAY() {
+   	public  boolean isOneConnectionPerTopic() {
+		return oneConnectionPerTopic;
+	}
+
+	public  void setOneConnectionPerTopic(boolean oneConnectionPerTopic) {
+		PublisherSampler.oneConnectionPerTopic = oneConnectionPerTopic;
+	}
+
+	public  String getSTRATEGY() {
+		return STRATEGY;
+	}
+
+	public  void setSTRATEGY(String sTRATEGY) {
+		STRATEGY = sTRATEGY;
+	}
+
+	public  String getSIZE_ARRAY() {
 		return SIZE_ARRAY;
 	}
 
