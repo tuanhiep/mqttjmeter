@@ -23,7 +23,6 @@
 package org.apache.jmeter.protocol.mqtt.sampler;
 import java.io.IOException;
 import java.util.Date;
-
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.protocol.mqtt.client.MqttPublisher;
@@ -56,7 +55,11 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static String  MAX_RANDOM_VALUE = "mqtt.max_random_value";
 	private static String  TYPE_GENERATED_VALUE = "mqtt.max_random_value";
 	private static String  SEED = "mqtt.seed";
+	private static String FORMAT="mqtt.format";
+	private static String CHARSET="mqtt.charset";
+	private static String SIZE_ARRAY="mqtt.size_array";
 	public transient MqttPublisher producer = null;
+	
 	// These static variables are only used to convert existing files
 	private static final String USE_FILE_LOCALNAME = JMeterUtils
 			.getResString(MQTTPublisherGui.USE_FILE_RSC);
@@ -73,13 +76,35 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 
 	// ---------------------Get/Set Property--------------------------//
 	
+	
+	
 	public void setTYPE_FIXED_VALUE(String type) {
     	setProperty(TYPE_FIXED_VALUE, type);
 		
 	}
-   
+   	public  String getSIZE_ARRAY() {
+		return SIZE_ARRAY;
+	}
 
-	
+	public void setSIZE_ARRAY(String sIZE_ARRAY) {
+		SIZE_ARRAY = sIZE_ARRAY;
+	}
+
+	public String getCHARSET() {
+		return CHARSET;
+	}
+
+	public void setCHARSET(String cHARSET) {
+		CHARSET = cHARSET;
+	}
+
+	public String getFORMAT() {
+		return FORMAT;
+	}
+
+	public void setFORMAT(String fORMAT) {
+		FORMAT = fORMAT;
+	}
 
 	public  String getCLIENT_ID() {
 		return CLIENT_ID;
@@ -314,7 +339,10 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 				parameters.addArgument("MAX_RANDOM_VALUE",getMAX_RANDOM_VALUE());
 				parameters.addArgument("TYPE_RANDOM_VALUE",getTYPE_RANDOM_VALUE());
 			}
-			
+			else if(this.getMessageChoice().equals(MQTTPublisherGui.BIG_VOLUME)){
+				parameters.addArgument("TYPE_MESSAGE","BYTE_ARRAY");
+				parameters.addArgument("SIZE_ARRAY",this.getSIZE_ARRAY());
+			}
 			
 			//-----------------------User/Password-------------------------------//
 			
@@ -323,7 +351,14 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 					parameters.addArgument("USER",getUsername());
 					parameters.addArgument("PASSWORD",getPassword());
 				} else parameters.addArgument("AUTH","FALSE");
-			
+			//-----------------------Format--------------------------------------//
+				    parameters.addArgument("FORMAT",getFORMAT());
+				    if(this.getFORMAT().equals(MQTTPublisherGui.PLAIN_TEXT)){
+				    parameters.addArgument("CHARSET",getCHARSET());	
+				    
+				    }
+				    else parameters.addArgument("CHARSET","NULL");
+				
 				this.context = new JavaSamplerContext(parameters);
 				this.producer.setupTest(this.context);
 

@@ -30,7 +30,9 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.BinaryCodec;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
@@ -143,7 +145,9 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("RETAINED"),
 					context.getParameter("TIME_STAMP"),
 					context.getParameter("NUMBER_SEQUENCE"),					
-					context.getParameter("TYPE_VALUE"));
+					context.getParameter("TYPE_VALUE"),
+					context.getParameter("FORMAT"),
+					context.getParameter("CHARSET"));
 
 		} else if ("RANDOM".equals(context.getParameter("TYPE_MESSAGE"))) {
 
@@ -152,7 +156,9 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("TOPIC"),Integer.parseInt(context.getParameter("AGGREGATE")),
 					context.getParameter("QOS"),context.getParameter("RETAINED"),
 					context.getParameter("TIME_STAMP"),context.getParameter("NUMBER_SEQUENCE"),
-					context.getParameter("TYPE_VALUE"));
+					context.getParameter("TYPE_VALUE"),
+					context.getParameter("FORMAT"),
+					context.getParameter("CHARSET"));
 									
 		} else if ("TEXT".equals(context.getParameter("TYPE_MESSAGE"))) {
 			produce(context.getParameter("MESSAGE"),
@@ -162,13 +168,67 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("RETAINED"),
 					context.getParameter("TIME_STAMP"),
 					context.getParameter("NUMBER_SEQUENCE"),					
-					context.getParameter("TYPE_VALUE"));
+					context.getParameter("TYPE_VALUE"),
+					context.getParameter("FORMAT"),
+					context.getParameter("CHARSET"));
+		} else if("BYTE_ARRAY".equals(context.getParameter("TYPE_MESSAGE"))){
+			produceBigVolume(
+					context.getParameter("TOPIC"),
+					Integer.parseInt(context.getParameter("AGGREGATE")),
+					context.getParameter("QOS"),
+					context.getParameter("RETAINED"),
+					context.getParameter("TIME_STAMP"),
+					context.getParameter("NUMBER_SEQUENCE"),					
+					context.getParameter("FORMAT"),
+					context.getParameter("CHARSET"),
+					context.getParameter("SIZE_ARRAY"));			
 		}
 
 	}
 
+
+
+	private void produceBigVolume(String topic, int aggregate,
+			String qos, String isRetained, String useTimeStamp,
+			String useNumberSeq, String format, String charset,String sizeArray) {
+		try {
+
+			// Quality
+			QoS quality = null;
+			if (MQTTPublisherGui.EXACTLY_ONCE.equals(qos)) {
+				quality = QoS.EXACTLY_ONCE;
+			} else if (MQTTPublisherGui.AT_LEAST_ONCE.equals(qos)) {
+				quality = QoS.AT_LEAST_ONCE;
+			} else if (MQTTPublisherGui.AT_MOST_ONCE.equals(qos)) {
+				quality = QoS.AT_MOST_ONCE;
+
+			}
+
+			// Retained
+			boolean retained = false;
+			if ("TRUE".equals(isRetained))
+				retained = true;
+			
+			// Type of value in content of message
+			
+			for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = createBigVolume( useTimeStamp, useNumberSeq,format, charset,sizeArray);	
+					this.connection.publish(topic,payload,quality, retained).await();
+					total.incrementAndGet();
+				}
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			getLogger().warn(e.getLocalizedMessage(), e);
+		}
+			
+	}
+
+
+
 	private void produce(String message, String topic, int aggregate,
-			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value) throws Exception {
+			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value, String format, String charset) throws Exception {
 
 		try {
 
@@ -191,7 +251,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			// Type of value in content of message
 			
 			for (int i = 0; i < aggregate; ++i) {
-					byte[] payload = createPayload(message, useTimeStamp, useNumberSeq, type_value);	
+					byte[] payload = createPayload(message, useTimeStamp, useNumberSeq, type_value,format, charset);	
 					this.connection.publish(topic,payload,quality, retained).await();
 					total.incrementAndGet();
 				}
@@ -204,7 +264,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	}
 
 	public void produceRandomly(String seed, String min, String max, String type_random,String topic, int aggregate,
-			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value){
+			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value,String format, String charset){
 		
 
 		try {
@@ -228,7 +288,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			// Type of value in content of message
 			
 			for (int i = 0; i < aggregate; ++i) {
-					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value);	
+					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value,format, charset);	
 					this.connection.publish(topic,payload,quality, retained).await();
 					total.incrementAndGet();
 				}
@@ -244,6 +304,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		
 		
 	}
+
 	public SampleResult runTest(JavaSamplerContext context) {
 		SampleResult result = new SampleResult();
 
@@ -292,20 +353,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			this.connection.disconnect();
 
 	}
-	
-    
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public byte[] createPayload(String message, String useTimeStamp, String useNumSeq ,String type_value) throws IOException, NumberFormatException {
+		
+	public byte[] createPayload(String message, String useTimeStamp, String useNumSeq ,String type_value, String format, String charset) throws IOException, NumberFormatException {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream d = new DataOutputStream(b);
 // flags  	
@@ -343,14 +392,29 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
   			d.write(message.getBytes());  			
   		} else if ("TEXT".equals(type_value)) {
   			d.write(message.getBytes());
-  		}       	
-		return b.toByteArray();
+  		}   
+  	    
+  
+// Format: Encoding  	   
+  	   if(MQTTPublisherGui.BINARY.equals(format)){
+  		   BinaryCodec encoder= new BinaryCodec();
+  		   return encoder.encode(b.toByteArray());
+  	   } else if(MQTTPublisherGui.BASE64.equals(format)){
+  		   return Base64.encodeBase64(b.toByteArray());
+  	   } else if(MQTTPublisherGui.BINHEX.equals(format)){
+  		   Hex encoder= new Hex();
+  		   return encoder.encode(b.toByteArray());
+  	   } else if(MQTTPublisherGui.PLAIN_TEXT.equals(format)){  		  
+  		   String s= new String (b.toByteArray(),charset);
+  		   return s.getBytes();
+  		   
+  	   } else return b.toByteArray();
 	}
   
     
     
     
-    public byte[] createRandomPayload(String Seed,String min, String max, String type_random, String useTimeStamp, String useNumSeq ,String type_value) throws IOException, NumberFormatException {
+    public byte[] createRandomPayload(String Seed,String min, String max, String type_random, String useTimeStamp, String useNumSeq ,String type_value, String format, String charset) throws IOException, NumberFormatException {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream d = new DataOutputStream(b);
 		
@@ -415,13 +479,65 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	  			float Max= Float.parseFloat(max);
 	  			float Min= Float.parseFloat(min);
 	  			d.writeFloat((Min+(Max-Min)*secureGenerator.nextFloat()));			
-	   		} 
-		
-		
+	   		}				
 	}
   	  
-  	    
-		return b.toByteArray();
+// Format: Encoding  	   
+	   if(MQTTPublisherGui.BINARY.equals(format)){
+		   BinaryCodec encoder= new BinaryCodec();
+		   return encoder.encode(b.toByteArray());
+	   } else if(MQTTPublisherGui.BASE64.equals(format)){
+		   return Base64.encodeBase64(b.toByteArray());
+	   } else if(MQTTPublisherGui.BINHEX.equals(format)){
+		   Hex encoder= new Hex();
+		   return encoder.encode(b.toByteArray());
+	   } else if(MQTTPublisherGui.PLAIN_TEXT.equals(format)){  		  
+		   String s= new String (b.toByteArray(),charset);
+		   return s.getBytes();
+		   
+	   } else return b.toByteArray();   
+		
 	}
+	private byte[] createBigVolume(String useTimeStamp, String useNumberSeq,String format, String charset, String sizeArray) throws IOException, NumberFormatException {
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		DataOutputStream d = new DataOutputStream(b);
+// flags  	
+    	byte flags=0x00;
+		if("TRUE".equals(useTimeStamp)) flags|=0x80;
+		if("TRUE".equals(useNumberSeq)) flags|=0x40;
+		d.writeByte(flags); 
+// TimeStamp
+		if("TRUE".equals(useTimeStamp)){
+   		 Date date= new java.util.Date();
+    	 d.writeLong(date.getTime());
+     	                               }
+// Number Sequence
+		if("TRUE".equals(useNumberSeq)){
+   	     d.writeInt(numSeq++);   	
+   	    
+  	    }
+		int size= Integer.parseInt(sizeArray);
+		byte[] content= new byte[size];
+		
+		for(int i=0;i<size;i++){
+			content[i]= (byte)i;		
+		}		
+		d.write(content);
+// Format: Encoding  	   
+	   if(MQTTPublisherGui.BINARY.equals(format)){
+		   BinaryCodec encoder= new BinaryCodec();
+		   return encoder.encode(b.toByteArray());
+	   } else if(MQTTPublisherGui.BASE64.equals(format)){
+		   return Base64.encodeBase64(b.toByteArray());
+	   } else if(MQTTPublisherGui.BINHEX.equals(format)){
+		   Hex encoder= new Hex();
+		   return encoder.encode(b.toByteArray());
+	   } else if(MQTTPublisherGui.PLAIN_TEXT.equals(format)){  		  
+		   String s= new String (b.toByteArray(),charset);
+		   return s.getBytes();
+		   
+	   } else return b.toByteArray();
 	
+				
+	}
 }
