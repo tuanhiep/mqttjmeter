@@ -71,10 +71,11 @@ the MQTT sever in this MQTT Publisher thread, with the value like the configurat
 
 ![Alt text](images/Publisher_Text.png)  
 
-*Encoding* 
+*Encoding*  
+ 
 **Message Format** : The type of encoding that you'll encode your data before publish .You can choose Binary Codec, Base64, BinHex or Plain Text  
 If you choose Plain Text, you can choose 6 types of charsets : UTF-8, UTF-16, US-ASCII,UTF-16LE, UTF-16BE, ISO-8859-1.  
-Of course, you can choose to no encode the data too.  
+Of course, you can choose to no encoding too.  
 
 *Add TimeStamp check box:* Add the timestamps to the message. The timestamps is 8 bytes  
 *Add Number Sequence check box:* Add the number sequence to the message. Example: if you
