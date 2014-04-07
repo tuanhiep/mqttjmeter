@@ -122,24 +122,25 @@ For example: With this flag header
 It means that, in the message, we have :  
 ![Alt text](images/Message.png)  
 
-*Generated Value:*  
+**Generated Value:**  
 The generated value can be of type: Integer, Long, Float, Double within the range [Min,Max] .
 The type of random can be: Pseudo random or Secure random. In the two cases, we can set the Seed
 for the generator.  
 
 ![Alt text](images/Publisher_generated_value.png)  
   
-*Fixed Value:*  
+**Fixed Value:**  
 The fixed value can be of type: Integer, Long, Float, Double, String within the range [Min,Max].  
   
 ![Alt text](images/Publisher_fixed_value.png)  
-*Random Byte Array:*  
+**Random Byte Array:**  
 
 The data in form of random byte array with the size array as an input.  
 For example, if you type 9 in the field size array, so without encoding, time header, number sequence, the message has 9 bytes of content(random data) and 1 byte of flag header  
 and so, 10 bytes to publish.
 The images below show when you publish with option : One Connection Per Topic and the data is type of Random Byte Array.
-In the terminal,you see that there are two connections of 2 client Id : "Noel De Palma 0"     
+In the terminal,you see that there are two connections of 2 client Id : "Noel De Palma 0"  
+     
 ![Alt text](images/One_connection_per_topic.png)  
 
 ![Alt text](images/Random_Byte_Array.png)  
