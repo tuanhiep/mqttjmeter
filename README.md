@@ -49,7 +49,10 @@ In the principal interface of MQTT Publisher we have the fields:
 *Comments:* Your comments  
 *Provider URL:* the address of MQTT server example: tcp://localhost:1883  
 *Client Id:* Your Id in the session with MQTT server example: Noel De Palma  
-*Topic:* The topic's name you want to publish
+*List Topic:* The list of topic's name you want to publish  
+ The topic'name is separated by a comma ","  
+ For example: List Topic: GRENOBLE/LIG,GRENOBLE/Joseph Fourrier University  
+ This means, you'll publish to 2 topic: GRENOBLE/LIG and GRENOBLE/Joseph Fourrier University
 *Use Authorization check box:* Necessary in the case the connection needs the username and
 password  
 *User:* Your username  
