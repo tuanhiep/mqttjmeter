@@ -54,10 +54,10 @@ In the principal interface of MQTT Publisher we have the fields:
  For example: List Topic: GRENOBLE/LIG,GRENOBLE/UJF-LIG  
  This means, you'll publish to 2 topic: GRENOBLE/LIG and GRENOBLE/UJF-LIG  
  You can choose the option **One connection per topic** : It means that for each topic in the list above, the plugin will create one correspondant
-  connection. Note that, if the client Id is Noel, for example, and you have 3 topic in the list, so the plugin will create 3 connection with 3 Client 
-  Id : Noel 0; Noel 1, Noel 2  
- The plugin provide two strategies for the publishion:  
- **1: Round Robin** : You'll publish to the topics in equal portions and in circular order
+  connection. Note that, if the client Id is Noel, for example, and you have 2 topics in the list, so the plugin will create 2 connection with 3 Client 
+  Id : "Noel 0" and "Noel 1"
+ The plugin provide two strategies to publish:  
+ **1: Round Robin** : You'll publish to the topics in equal portions and in circular order  
  **2: Random** : You'll publish to a random topic in the list above  
  *Use Authorization check box:* Necessary in the case the connection needs the username and
 password  
