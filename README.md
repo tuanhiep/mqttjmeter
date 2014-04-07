@@ -139,7 +139,7 @@ The data in form of random byte array with the size array as an input.
 For example, if you type 9 in the field size array, so without encoding, time header, number sequence, the message has 9 bytes of content(random data) and 1 byte of flag header  
 and so, 10 bytes to publish.
 The images below show when you publish with option : One Connection Per Topic and the data is type of Random Byte Array.
-In the terminal,you see that there are two connections of 2 client Id : "Noel De Palma 0"  
+In the terminal,you see that there are two connections of 2 client Id : "Didier Donsez 0" and "Didier Donsez 1" 
      
 ![Alt text](images/One_connection_per_topic.png)  
 
