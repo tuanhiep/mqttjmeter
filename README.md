@@ -76,17 +76,19 @@ the MQTT sever in this MQTT Publisher thread, with the value like the configurat
 **Message Format** : The type of encoding that you'll encode your data before publish .You can choose Binary Codec, Base64, BinHex or Plain Text  
 If you choose Plain Text, you can choose 6 types of charsets : UTF-8, UTF-16, US-ASCII,UTF-16LE, UTF-16BE, ISO-8859-1.  
 Of course, you can choose to no encoding too.  
+  
+*Option*  
 
-*Add TimeStamp check box:* Add the timestamps to the message. The timestamps is 8 bytes  
-*Add Number Sequence check box:* Add the number sequence to the message. Example: if you
+**Add TimeStamp check box:** Add the timestamps to the message. The timestamps is 8 bytes  
+**Add Number Sequence check box:** Add the number sequence to the message. Example: if you
 publish 100 messages in your session, the message is numbered from 0 to 99. The number sequence 
 field in the message is 4 bytes.  
-*Retained check box:* You publish the messages as retained messages or not. The retain flag for an
+**Retained check box:** You publish the messages as retained messages or not. The retain flag for an
 MQTT message is set to false by default. This means that a broker will not hold onto the message 
 so that any subscribers arriving after the message was sent will not see the message. By setting 
 the retain flag, the message is held onto by the broker, so when the late arrivers connect to the 
 broker or clients create a new subscription they get all the relevant retained messages”  
-*Quality of service:* Three levels:  
+**Quality of service:** Three levels:  
 0 : At most once  
 1 : At least once  
 2 : Exactly once  
@@ -103,7 +105,7 @@ exchanges, first to transfer the message and then to ensure only one copy has be
 being processed. This does make Exactly Once the slower but most reliable QoS setting.
 
 With MQTT Publisher in Jmeter, three type of messages can be sent (Message Type):  
-*Text:* The text message, without flag header and the server MQTT can deliver it like a normal
+**Text:** The text message, without flag header and the server MQTT can deliver it like a normal
 text.  
 
 ![Alt text](images/Publisher_Text.png)  
