@@ -106,7 +106,7 @@ being processed. This does make Exactly Once the slower but most reliable QoS se
 
 With MQTT Publisher in Jmeter, three type of messages can be sent (Message Type):  
 **Text:** The text message, without flag header and the server MQTT can deliver it like a normal
-text.  
+text if you choose *No Encoding* or *Plain Text*.  
 
 ![Alt text](images/Publisher_Text.png)  
  
@@ -133,6 +133,17 @@ for the generator.
 The fixed value can be of type: Integer, Long, Float, Double, String within the range [Min,Max].  
   
 ![Alt text](images/Publisher_fixed_value.png)  
+*Random Byte Array:*  
+
+The data in form of random byte array with the size array as an input.  
+For example, if you type 9 in the field size array, so without encoding, time header, number sequence, the message has 9 bytes of content(random data) and 1 byte of flag header  
+and so, 10 bytes to publish.
+The images below show when you publish with option : One Connection Per Topic and the data is type of Random Byte Array.
+In the terminal,you see that there are two connections of 2 client Id : "Noel De Palma 0"     
+![Alt text](images/One_connection_per_topic.png)  
+
+![Alt text](images/Random_Byte_Array.png)  
+
 
 For mesuring, thanks to Jmeter, we can add some listeners:  
   
