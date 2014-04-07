@@ -337,8 +337,6 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	
 	}
 	
-
-
 	@Override
 	public TestElement createTestElement() {
 		PublisherSampler sampler = new PublisherSampler();
@@ -398,8 +396,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	 */
 	private void updateChoice(String command) {
 		
-		if(TEXT_MSG_RSC.equals(command)){
-			
+		if(TEXT_MSG_RSC.equals(command)){			
 			this.typeGeneratedValue.setVisible(false);
 			this.typeFixedValue.setVisible(false);
 			this.max.setVisible(false);
@@ -409,10 +406,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			this.seed.setVisible(false);
 			this.textArea.setVisible(true);
 			this.textPanel.setVisible(true);
-			this.sizeArray.setVisible(false);
-													}
+			this.sizeArray.setVisible(false);													}
 		else if(GENERATED_VALUE.equals(command)) {
-
 			this.typeFixedValue.setVisible(false);
 			this.value.setVisible(false);
 			this.textArea.setVisible(false);
@@ -424,7 +419,6 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			this.seed.setVisible(true);
 			this.sizeArray.setVisible(false);
 		} else if(FIXED_VALUE.equals(command)){
-
 			this.typeGeneratedValue.setVisible(false);
 			this.typeFixedValue.setVisible(true);
 			this.max.setVisible(false);
@@ -435,8 +429,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 			this.textArea.setVisible(false);
 			this.textPanel.setVisible(false);
 			this.sizeArray.setVisible(false);								}
-		else if(BIG_VOLUME.equals(command)){
-			
+		else if(BIG_VOLUME.equals(command)){			
 			this.typeGeneratedValue.setVisible(false);
 			this.typeFixedValue.setVisible(false);
 			this.max.setVisible(false);

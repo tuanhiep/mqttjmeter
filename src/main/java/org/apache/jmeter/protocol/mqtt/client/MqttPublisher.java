@@ -30,6 +30,7 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.codec.binary.Hex;
@@ -47,7 +48,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		Serializable, Closeable {
 	private static final long serialVersionUID = 1L;
 	private AtomicInteger total = new AtomicInteger(0);
-	private FutureConnection connection;
+//	private FutureConnection connection;
+	private FutureConnection[] connectionArray;
 	public static int numSeq=0;
 	private Random generator = new Random();	
 	private SecureRandom secureGenerator= new SecureRandom(); 
@@ -67,38 +69,48 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	public void setupTest(JavaSamplerContext context) {
 		String host = context.getParameter("HOST");
 		String clientId = context.getParameter("CLIENT_ID");
+        
+		if("FALSE".equals(context.getParameter("PER_TOPIC"))){			
+			if("TRUE".equals(context.getParameter("AUTH"))){			
+				setupTest(host,clientId,context.getParameter("USER"),context.getParameter("PASSWORD"),1);		
+				}
+				else{	setupTest(host, clientId,1);}		
 
-		if("TRUE".equals(context.getParameter("AUTH"))){			
-		setupTest(host,clientId,context.getParameter("USER"),context.getParameter("PASSWORD"));
-		
 		}
-		else{
-			setupTest(host, clientId);
-		}		
-		
-
-	}
-
-	public void setupTest(String host, String clientId) {
-		try {
-
-			this.connection = createConnection(host,clientId);
-
-			this.connection.connect().await();
+		else if("TRUE".equals(context.getParameter("PER_TOPIC"))){
 			
+			String topics= context.getParameter("TOPIC");
+			String[] topicArray = topics.split("\\s*,\\s*");
+			int size= topicArray.length;
+		
+			if("TRUE".equals(context.getParameter("AUTH"))){			
+				setupTest(host,clientId,context.getParameter("USER"),context.getParameter("PASSWORD"),size);		
+				}
+				else {	setupTest(host, clientId,size);}
+		    }
+			}
 
+	public void setupTest(String host, String clientId, int size) {
+		try {
+			this.connectionArray= new FutureConnection[size];
+			for(int i = 0;i< size;i++){
+				this.connectionArray[i]= createConnection(host,clientId+" "+i);
+				this.connectionArray[i].connect().await();
+			}
+			
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
 		}
+		
 	}
-	public void setupTest(String host, String clientId, String user, String password) {
+	public void setupTest(String host, String clientId, String user, String password, int size) {
 		try {
-
-			this.connection = createConnection(host,clientId,user,password);
-
-			this.connection.connect().await();
-			
-
+			this.connectionArray= new FutureConnection[size];
+			for(int i = 0;i< size;i++){
+				this.connectionArray[i]= createConnection(host,clientId+" "+i,user,password);
+				this.connectionArray[i].connect().await();
+			}
+	
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
 		}
@@ -134,7 +146,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	}
 
 	private void produce(JavaSamplerContext context) throws Exception {
-
+		
 		// ---------------------Type of message -------------------//
 
 		if ("FIXED".equals(context.getParameter("TYPE_MESSAGE"))) {
@@ -147,7 +159,10 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("NUMBER_SEQUENCE"),					
 					context.getParameter("TYPE_VALUE"),
 					context.getParameter("FORMAT"),
-					context.getParameter("CHARSET"));
+					context.getParameter("CHARSET"),
+					context.getParameter("LIST_TOPIC"),
+					context.getParameter("STRATEGY"),
+					context.getParameter("PER_TOPIC"));
 
 		} else if ("RANDOM".equals(context.getParameter("TYPE_MESSAGE"))) {
 
@@ -158,7 +173,10 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("TIME_STAMP"),context.getParameter("NUMBER_SEQUENCE"),
 					context.getParameter("TYPE_VALUE"),
 					context.getParameter("FORMAT"),
-					context.getParameter("CHARSET"));
+					context.getParameter("CHARSET"),
+					context.getParameter("LIST_TOPIC"),
+					context.getParameter("STRATEGY"),
+					context.getParameter("PER_TOPIC"));
 									
 		} else if ("TEXT".equals(context.getParameter("TYPE_MESSAGE"))) {
 			produce(context.getParameter("MESSAGE"),
@@ -170,7 +188,10 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("NUMBER_SEQUENCE"),					
 					context.getParameter("TYPE_VALUE"),
 					context.getParameter("FORMAT"),
-					context.getParameter("CHARSET"));
+					context.getParameter("CHARSET"),
+					context.getParameter("LIST_TOPIC"),
+					context.getParameter("STRATEGY"),
+					context.getParameter("PER_TOPIC"));
 		} else if("BYTE_ARRAY".equals(context.getParameter("TYPE_MESSAGE"))){
 			produceBigVolume(
 					context.getParameter("TOPIC"),
@@ -181,7 +202,10 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					context.getParameter("NUMBER_SEQUENCE"),					
 					context.getParameter("FORMAT"),
 					context.getParameter("CHARSET"),
-					context.getParameter("SIZE_ARRAY"));			
+					context.getParameter("SIZE_ARRAY"),
+					context.getParameter("LIST_TOPIC"),
+					context.getParameter("STRATEGY"),
+					context.getParameter("PER_TOPIC"));			
 		}
 
 	}
@@ -190,7 +214,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 	private void produceBigVolume(String topic, int aggregate,
 			String qos, String isRetained, String useTimeStamp,
-			String useNumberSeq, String format, String charset,String sizeArray) {
+			String useNumberSeq, String format, String charset,String sizeArray,String isListTopic,String strategy,String isPerTopic) {
 		try {
 
 			// Quality
@@ -208,17 +232,46 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			boolean retained = false;
 			if ("TRUE".equals(isRetained))
 				retained = true;
-			
-			// Type of value in content of message
-			
-			for (int i = 0; i < aggregate; ++i) {
+			// List topic
+			if("FALSE".equals(isListTopic)){		
+				for (int i = 0; i < aggregate; ++i) {
 					byte[] payload = createBigVolume( useTimeStamp, useNumberSeq,format, charset,sizeArray);	
-					this.connection.publish(topic,payload,quality, retained).await();
+					this.connectionArray[0].publish(topic,payload,quality,retained).await();
 					total.incrementAndGet();
 				}
-			
-
-		} catch (Exception e) {
+			}
+			else if("TRUE".equals(isListTopic)){
+				String[] topicArray= topic.split("\\s*,\\s*");
+				int length= topicArray.length;
+				Random rand = new Random();	
+				for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = createBigVolume( useTimeStamp, useNumberSeq,format, charset,sizeArray);	
+					//-----------------------------Publish after strategy---------------------//					
+					if("ROUND_ROBIN".equals(strategy)){
+						for(int j=0;j<length;j++){							
+							if("TRUE".equals(isPerTopic)){
+								this.connectionArray[j].publish(topicArray[j],payload,quality, retained).await();
+								total.incrementAndGet();
+							} else if("FALSE".equals(isPerTopic)){
+								this.connectionArray[0].publish(topicArray[j],payload,quality, retained).await();	
+								total.incrementAndGet();
+							}							
+						}
+					}
+					else if("RANDOM".equals(strategy)){											
+						int  r = rand.nextInt(length);
+						if("TRUE".equals(isPerTopic)){
+							this.connectionArray[r].publish(topicArray[r],payload,quality,retained).await();
+							total.incrementAndGet();
+						} else if("FALSE".equals(isPerTopic)){
+							this.connectionArray[0].publish(topicArray[r],payload,quality,retained).await();
+							total.incrementAndGet();
+						}
+						
+					}
+						}
+			}
+					} catch (Exception e) {
 			e.printStackTrace();
 			getLogger().warn(e.getLocalizedMessage(), e);
 		}
@@ -228,10 +281,9 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 
 	private void produce(String message, String topic, int aggregate,
-			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value, String format, String charset) throws Exception {
-
+			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value, String format, String charset,String isListTopic,String strategy,String isPerTopic) throws Exception {
+		
 		try {
-
 			// Quality
 			QoS quality = null;
 			if (MQTTPublisherGui.EXACTLY_ONCE.equals(qos)) {
@@ -240,23 +292,51 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 				quality = QoS.AT_LEAST_ONCE;
 			} else if (MQTTPublisherGui.AT_MOST_ONCE.equals(qos)) {
 				quality = QoS.AT_MOST_ONCE;
-
 			}
-
 			// Retained
 			boolean retained = false;
 			if ("TRUE".equals(isRetained))
 				retained = true;
-			
-			// Type of value in content of message
-			
-			for (int i = 0; i < aggregate; ++i) {
+			// List topic
+			if("FALSE".equals(isListTopic)){		
+				for (int i = 0; i < aggregate; ++i) {
 					byte[] payload = createPayload(message, useTimeStamp, useNumberSeq, type_value,format, charset);	
-					this.connection.publish(topic,payload,quality, retained).await();
+					this.connectionArray[0].publish(topic,payload,quality,retained).await();
 					total.incrementAndGet();
 				}
-			
-
+			}
+			else if("TRUE".equals(isListTopic)){
+				String[] topicArray= topic.split("\\s*,\\s*");
+				int length= topicArray.length;
+				Random rand = new Random();	
+				for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = createPayload(message, useTimeStamp, useNumberSeq, type_value,format, charset);	
+					//---------------------Publish after strategy------------------//					
+					if("ROUND_ROBIN".equals(strategy)){
+						for(int j=0;j<length;j++){
+							if("TRUE".equals(isPerTopic)){
+								System.out.println("this is :"+j);
+								this.connectionArray[j].publish(topicArray[j],payload,quality, retained).await();
+						
+								total.incrementAndGet();
+							} else if("FALSE".equals(isPerTopic)){
+								this.connectionArray[0].publish(topicArray[j],payload,quality, retained).await();							
+								total.incrementAndGet();
+							}											
+						}
+					}
+					else if("RANDOM".equals(strategy)){											
+						int  r = rand.nextInt(length);
+						if("TRUE".equals(isPerTopic)){
+							this.connectionArray[r].publish(topicArray[r],payload,quality,retained).await();
+							total.incrementAndGet();
+						} else if("FALSE".equals(isPerTopic)){
+							this.connectionArray[0].publish(topicArray[r],payload,quality,retained).await();
+							total.incrementAndGet();
+						}
+					}
+						}
+			}					
 		} catch (Exception e) {
 			e.printStackTrace();
 			getLogger().warn(e.getLocalizedMessage(), e);
@@ -264,11 +344,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	}
 
 	public void produceRandomly(String seed, String min, String max, String type_random,String topic, int aggregate,
-			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value,String format, String charset){
-		
-
+			String qos, String isRetained, String useTimeStamp, String useNumberSeq,String type_value,String format, String charset,String isListTopic,String strategy,String isPerTopic){
 		try {
-
 			// Quality
 			QoS quality = null;
 			if (MQTTPublisherGui.EXACTLY_ONCE.equals(qos)) {
@@ -277,32 +354,56 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 				quality = QoS.AT_LEAST_ONCE;
 			} else if (MQTTPublisherGui.AT_MOST_ONCE.equals(qos)) {
 				quality = QoS.AT_MOST_ONCE;
-
 			}
-
 			// Retained
 			boolean retained = false;
 			if ("TRUE".equals(isRetained))
-				retained = true;
-			
-			// Type of value in content of message
-			
-			for (int i = 0; i < aggregate; ++i) {
-					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value,format, charset);	
-					this.connection.publish(topic,payload,quality, retained).await();
+			retained = true;
+			// List topic
+			if("FALSE".equals(isListTopic)){		
+				for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value,format, charset);		
+					this.connectionArray[0].publish(topic,payload,quality,retained).await();
 					total.incrementAndGet();
 				}
-			
-
+			}
+			else if("TRUE".equals(isListTopic)){
+				String[] topicArray= topic.split("\\s*,\\s*");
+				int length= topicArray.length;
+				Random rand = new Random();	
+				for (int i = 0; i < aggregate; ++i) {
+					byte[] payload = this.createRandomPayload(seed, min, max, type_random, useTimeStamp, useNumberSeq, type_value,format, charset);		
+					//---------------------Publish after strategy------------------//					
+					if("ROUND_ROBIN".equals(strategy)){
+						for(int j=0;j<length;j++){
+							if("TRUE".equals(isPerTopic)){
+								this.connectionArray[j].publish(topicArray[j],payload,quality, retained).await();
+								total.incrementAndGet();
+							} else if("FALSE".equals(isPerTopic)){
+								this.connectionArray[0].publish(topicArray[j],payload,quality, retained).await();							
+								total.incrementAndGet();
+							}
+						}
+					}
+					else if("RANDOM".equals(strategy)){											
+						int  r = rand.nextInt(length);
+						
+						if("TRUE".equals(isPerTopic)){
+							this.connectionArray[r].publish(topicArray[r],payload,quality,retained).await();
+							total.incrementAndGet();
+						} else if("FALSE".equals(isPerTopic)){
+							this.connectionArray[0].publish(topicArray[r],payload,quality,retained).await();
+							total.incrementAndGet();
+						}
+						
+					}
+						}
+			}			
 		} catch (Exception e) {
 			e.printStackTrace();
 			getLogger().warn(e.getLocalizedMessage(), e);
 		}
-		
-		
-		
-		
-		
+			
 	}
 
 	public SampleResult runTest(JavaSamplerContext context) {
@@ -335,22 +436,28 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		return result;
 	}
 
-	/**
-	 * 
-	 * @return the boolean value which mean the connection of publisher exists
-	 *         or not
-	 */
-
-	public boolean isConnected() {
-		return this.connection.isConnected();
-
-	}
+//	/**
+//	 * 
+//	 * @return the boolean value which mean the connection of publisher exists
+//	 *         or not
+//	 */
+//
+//	public boolean isConnected() {
+//		return this.connection.isConnected();
+//
+//	}
 
 	@Override
 	public void close() throws IOException {
 
-		if (this.connection != null)
-			this.connection.disconnect();
+	if(this.connectionArray!=null){
+		for(int p=0;p<this.connectionArray.length;p++){			
+			if (this.connectionArray[p] != null)
+				this.connectionArray[p].disconnect();
+		     	this.connectionArray[p]=null;
+													  }		
+	                                                  }			
+		this.connectionArray= null;
 
 	}
 		
@@ -393,8 +500,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
   		} else if ("TEXT".equals(type_value)) {
   			d.write(message.getBytes());
   		}   
-  	    
-  
+  	      
 // Format: Encoding  	   
   	   if(MQTTPublisherGui.BINARY.equals(format)){
   		   BinaryCodec encoder= new BinaryCodec();
@@ -410,16 +516,11 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
   		   
   	   } else return b.toByteArray();
 	}
-  
-    
-    
+       
     
     public byte[] createRandomPayload(String Seed,String min, String max, String type_random, String useTimeStamp, String useNumSeq ,String type_value, String format, String charset) throws IOException, NumberFormatException {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream d = new DataOutputStream(b);
-		
-		
-		
 // flags  	
     	byte flags=0x00;
 		if("TRUE".equals(useTimeStamp)) flags|=0x80;
@@ -536,7 +637,9 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		   String s= new String (b.toByteArray(),charset);
 		   return s.getBytes();
 		   
-	   } else return b.toByteArray();
+	   } else 
+		   
+	   return b.toByteArray();
 	
 				
 	}
