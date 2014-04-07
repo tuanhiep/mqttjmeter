@@ -44,22 +44,22 @@ Right-click “Thread” and choose : Add → Sampler → MQTT Publisher
 ![Alt text](images/MQTT_Publisher.png)
 
 In the principal interface of MQTT Publisher we have the fields:
-
+*Connection Info*  
 **Name:** Name of the MQTT Publisher  
 **Comments:** Your comments  
 **Provider URL:** the address of MQTT server example: tcp://localhost:1883  
 **Client Id:** Your Id in the session with MQTT server example: Noel De Palma  
-**List Topic:** The list of topic's name you want to publish  
+**List Topic:** The list of topic's name you want to publish to 
  The topic's names are separated by a comma ","  
  For example: List Topic: GRENOBLE/LIG,GRENOBLE/UJF-LIG  
- This means, you'll publish to 2 topic: GRENOBLE/LIG and GRENOBLE/UJF-LIG  
+ This means, you'll publish to 2 topics: GRENOBLE/LIG and GRENOBLE/UJF-LIG  
  You can choose the option **One connection per topic** : It means that for each topic in the list above, the plugin will create one correspondant
-  connection. Note that, if the client Id is "Noel De Palma", for example, and you have 2 topics in the list, so the plugin will create 2 connection with 3 Client 
-  Id : "Noel De Palma 0" and "Noel De Palma 1"
+  connection. Note that, if the client Id is "Noel De Palma", for example, and you have 2 topics in the list, so the plugin will create 2 connections with 2 Client 
+  Id : "Noel De Palma 0" and "Noel De Palma 1"  
  The plugin provide two strategies to publish:  
  **1: Round Robin** : You'll publish to the topics in equal portions and in circular order  
  **2: Random** : You'll publish to a random topic in the list above  
- *Use Authorization check box:* Necessary in the case the connection needs the username and
+ **Use Authorization check box:** Necessary in the case the connection needs the username and
 password  
 **User:** Your username  
 **Password:** Your password  
