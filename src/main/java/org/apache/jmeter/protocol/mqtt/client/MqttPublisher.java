@@ -621,7 +621,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		byte[] content= new byte[size];
 		
 		for(int i=0;i<size;i++){
-			content[i]= (byte)i;		
+			content[i]= (byte)(i%10);		
 		}		
 		d.write(content);
 // Format: Encoding  	   
