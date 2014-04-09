@@ -50,7 +50,7 @@ In the principal interface of MQTT Publisher we have the fields:
 **Comments:** Your comments  
 **Provider URL:** the address of MQTT server example: tcp://localhost:1883  
 **Client Id:** Your Id in the session with MQTT server example: Noel De Palma  
-**List Topic:** The list of topic's name you want to publish to  
+**List Topic:** The list of topic's names you want to publish to  
 The topic's names are separated by a comma ","  
 For example: List Topic: GRENOBLE/LIG,GRENOBLE/UJF-LIG  
 This means, you'll publish to 2 topics: GRENOBLE/LIG and GRENOBLE/UJF-LIG  
