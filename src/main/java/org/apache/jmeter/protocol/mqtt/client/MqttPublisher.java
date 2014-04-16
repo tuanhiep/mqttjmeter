@@ -227,7 +227,6 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 				quality = QoS.AT_MOST_ONCE;
 
 			}
-
 			// Retained
 			boolean retained = false;
 			if ("TRUE".equals(isRetained))
@@ -548,7 +547,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	if(MQTTPublisherGui.PSEUDO.equals(type_random)){
 		    generator.setSeed(Long.parseLong(Seed));
 		    if (MQTTPublisherGui.INT.equals(type_value)) {	  	    	
-	  			d.writeInt(generator.nextInt(Integer.parseInt(max)-Integer.parseInt(min))+Integer.parseInt(min));  
+	  			d.writeInt(generator.nextInt(Integer.parseInt(max)
+	  					-Integer.parseInt(min))+Integer.parseInt(min));  
 	   		} else if (MQTTPublisherGui.LONG.equals(type_value)) {	  			
 	  			long Max= Long.parseLong(max);
 	  			long Min= Long.parseLong(min);
