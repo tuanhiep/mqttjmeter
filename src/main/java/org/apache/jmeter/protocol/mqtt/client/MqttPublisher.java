@@ -48,13 +48,10 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		Serializable, Closeable {
 	private static final long serialVersionUID = 1L;
 	private AtomicInteger total = new AtomicInteger(0);
-//	private FutureConnection connection;
 	private FutureConnection[] connectionArray;
 	public static int numSeq=0;
 	private Random generator = new Random();	
 	private SecureRandom secureGenerator= new SecureRandom(); 
-
-
 	@Override
 	public Arguments getDefaultParameters() {
 		Arguments defaultParameters = new Arguments();
@@ -434,17 +431,6 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 		return result;
 	}
-
-//	/**
-//	 * 
-//	 * @return the boolean value which mean the connection of publisher exists
-//	 *         or not
-//	 */
-//
-//	public boolean isConnected() {
-//		return this.connection.isConnected();
-//
-//	}
 
 	@Override
 	public void close() throws IOException {

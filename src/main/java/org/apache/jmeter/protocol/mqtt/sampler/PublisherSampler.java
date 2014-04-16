@@ -38,9 +38,6 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 
 	private static final long serialVersionUID = 233L;
 	private static final Logger log = LoggingManager.getLoggerForClass();
-	// ++ These are JMX file names and must not be changed
-//	private static final String INPUT_FILE = "mqtt.input_file"; //$NON-NLS-1$
-//	private static final String RANDOM_PATH = "mqtt.random_path"; //$NON-NLS-1$
 	private static final String TEXT_MSG = "mqtt.text_message"; //$NON-NLS-1$
 	private static final String CONFIG_CHOICE = "mqtt.config_choice"; //$NON-NLS-1$
 	private static final String MESSAGE_CHOICE = "mqtt.config_msg_type"; //$NON-NLS-1$
@@ -63,11 +60,6 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static String OneConnectionPerTopic = "mqtt.one_connection_per_topic"; //$NON-NLS-1$
 	public transient MqttPublisher producer = null;
 
-//	These static variables are only used to convert existing files
-//	private static final String USE_FILE_LOCALNAME = JMeterUtils
-//			.getResString(MQTTPublisherGui.USE_FILE_RSC);
-//	private static final String USE_RANDOM_LOCALNAME = JMeterUtils
-//			.getResString(MQTTPublisherGui.USE_RANDOM_RSC);
 	private JavaSamplerContext context = null;
 
 	/**
@@ -226,12 +218,6 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	public void setTextMessage(String message) {
 		setProperty(TEXT_MSG, message);
 	}
-
-//	public void setRandomPath(String path) {
-//		setProperty(RANDOM_PATH, path);
-//
-//	}
-
 	public void setConfigChoice(String choice) {
 		setProperty(CONFIG_CHOICE, choice);
 
@@ -245,33 +231,6 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	public String getTextMessage() {
 		return getPropertyAsString(TEXT_MSG);
 	}
-
-//	public String getInputFile() {
-//		return getPropertyAsString(INPUT_FILE);
-//	}
-
-//	public String getRandomPath() {
-//		return getPropertyAsString(RANDOM_PATH);
-//	}
-
-	/**
-	 * To get the configuration choice
-	 */
-
-//	public String getConfigChoice() {
-//		// Allow for the old JMX file which used the local language string
-//		String config = getPropertyAsString(CONFIG_CHOICE);
-//		if (config.equals(USE_FILE_LOCALNAME)
-//				|| config.equals(MQTTPublisherGui.USE_FILE_RSC)) {
-//			return MQTTPublisherGui.USE_FILE_RSC;
-//		}
-//		if (config.equals(USE_RANDOM_LOCALNAME)
-//				|| config.equals(MQTTPublisherGui.USE_RANDOM_RSC)) {
-//			return MQTTPublisherGui.USE_RANDOM_RSC;
-//		}
-//		return config; // will be the 3rd option, which is not checked
-//						// specifically
-//	}
 
 	/**
 	 * To get the message choice
