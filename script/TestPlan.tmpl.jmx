@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="2.6" jmeter="2.11 r1554548">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">__NUMCLIENT__</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">10</stringProp>
+        <longProp name="ThreadGroup.start_time">1397652808000</longProp>
+        <longProp name="ThreadGroup.end_time">1397652808000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher" enabled="true">
+          <stringProp name="mqtt.provider_url">tcp://localhost:1883</stringProp>
+          <stringProp name="mqtt.topic">LIG</stringProp>
+          <stringProp name="mqtt.security_principle"></stringProp>
+          <stringProp name="mqtt.security_credentials"></stringProp>
+          <stringProp name="mqtt.text_message"></stringProp>
+          <stringProp name="mqtt.config_msg_type">mqtt_generated_value</stringProp>
+          <stringProp name="mqtt.iterations">5</stringProp>
+          <boolProp name="mqtt.authenticate">false</boolProp>
+          <stringProp name="mqtt.quality">__QOS__</stringProp>
+          <boolProp name="mqtt.retain">__RETAIN__</boolProp>
+          <stringProp name="mqtt.type_fixed_value">mqtt_int_value</stringProp>
+          <stringProp name="mqtt.fixed_value"></stringProp>
+          <stringProp name="mqtt.type_random_value">mqtt_pseudo_random</stringProp>
+          <stringProp name="mqtt.max_random_value">999</stringProp>
+          <stringProp name="mqtt.min_random_value">9</stringProp>
+          <stringProp name="mqtt.type_generated_value">mqtt_float_value</stringProp>
+          <stringProp name="mqtt.seed">5</stringProp>
+          <boolProp name="mqtt.use_timestamp">false</boolProp>
+          <boolProp name="mqtt.use_number_sequence">false</boolProp>
+          <stringProp name="mqtt.clientid">Hiep</stringProp>
+          <stringProp name="mqtt.format">mqtt_no_encoding</stringProp>
+          <stringProp name="mqtt.charset">UTF-8</stringProp>
+          <stringProp name="mqtt.size_array"></stringProp>
+          <stringProp name="mqtt.strategy">mqtt_round_robin</stringProp>
+          <boolProp name="mqtt.one_connection_per_topic">true</boolProp>
+        </org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
