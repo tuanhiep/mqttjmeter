@@ -39,6 +39,8 @@ import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui;
 import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterContext;
+import org.apache.jmeter.threads.JMeterContextService;
 import org.fusesource.mqtt.client.FutureConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
@@ -66,7 +68,6 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	public void setupTest(JavaSamplerContext context) {
 		String host = context.getParameter("HOST");
 		String clientId = context.getParameter("CLIENT_ID");
-        
 		if("FALSE".equals(context.getParameter("PER_TOPIC"))){			
 			if("TRUE".equals(context.getParameter("AUTH"))){			
 				setupTest(host,clientId,context.getParameter("USER"),context.getParameter("PASSWORD"),1);		
@@ -89,15 +90,16 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 
 	public void setupTest(String host, String clientId, int size) {
 		try {
+			JMeterContext jmcx = JMeterContextService.getContext();
 			this.connectionArray= new FutureConnection[size];
 			if(size==1){
-				this.connectionArray[0]= createConnection(host,clientId);
+				this.connectionArray[0]= createConnection(host,clientId+" "+jmcx.getThreadNum());
 				this.connectionArray[0].connect().await();
 			}
 			else 
 			{				
 				for(int i = 0;i< size;i++){
-					this.connectionArray[i]= createConnection(host,clientId+" "+i);
+					this.connectionArray[i]= createConnection(host,clientId+" "+jmcx.getThreadNum()+" "+i);
 					this.connectionArray[i].connect().await();
 				}
 			}
@@ -109,16 +111,17 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	}
 	public void setupTest(String host, String clientId, String user, String password, int size) {
 		try {
+			JMeterContext jmcx = JMeterContextService.getContext();
 			this.connectionArray= new FutureConnection[size];
 			
 			if(size==1){
-				this.connectionArray[0]= createConnection(host,clientId,user,password);
+				this.connectionArray[0]= createConnection(host,clientId+" "+jmcx.getThreadNum(),user,password);
 				this.connectionArray[0].connect().await();
 				
 			}
 			else {
 				for(int i = 0;i< size;i++){
-					this.connectionArray[i]= createConnection(host,clientId+" "+i,user,password);
+					this.connectionArray[i]= createConnection(host,clientId+" "+jmcx.getThreadNum()+" "+i,user,password);
 					this.connectionArray[i].connect().await();
 				 }
 				 }				
@@ -451,7 +454,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		for(int p=0;p<this.connectionArray.length;p++){			
 			if (this.connectionArray[p] != null)
 				this.connectionArray[p].disconnect();
-		     	this.connectionArray[p]=null;
+			   	this.connectionArray[p]=null;
 													  }		
 	                                                  }			
 		this.connectionArray= null;

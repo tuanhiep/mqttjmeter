@@ -397,7 +397,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 			try {
 				producer.close();
 				MqttPublisher.numSeq = 0;
-
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 				log.warn(e.getLocalizedMessage(), e);

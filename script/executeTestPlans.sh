@@ -3,8 +3,16 @@
 #echo Please read 16.7 Reducing resource requirements http://jmeter.apache.org/usermanual/best-practices.html
 #echo Please read 2.4.3 2.4.7 http://jmeter.apache.org/usermanual/get-started.html
 #echo Please read http://jmeter.apache.org/usermanual/jmeter_distributed_testing_step_by_step.pdf
+#ANUMCLIENT=(10 100 1000 10000)
+i=0
+for ((c=100;c<=10000;c=c+200))
 
-ANUMCLIENT=( 100 1000 10000)
+do
+	
+	ANUMCLIENT[$i]=$c;
+	i=$i+1;
+
+done
 AQOS=(0 1 2)
 ARETAIN=(true false)
 
@@ -29,6 +37,13 @@ then
         rm -r Summarisers
 fi
 	mkdir Summarisers
+cd Summarisers
+if [ -d "Total" ]
+then
+        rm -r Total
+fi
+	mkdir Total
+	cd ../
 for NUMCLIENT in ${ANUMCLIENT[*]}
 do
 for QOS in ${AQOS[*]}
@@ -39,6 +54,7 @@ do
 	echo "running testplan.$SUFFIX.jmx"
 	./../jmeter -n -t TestPlans/testplan.$SUFFIX.jmx -p specific.properties -l Results/result.$SUFFIX.jtl -j Logs/log.$SUFFIX.log #$REMOTE
         cat Logs/log.$SUFFIX.log | grep 'Summariser' > Summarisers/summariser.$SUFFIX.log
+        cat Logs/log.$SUFFIX.log | grep 'summary =' >> Summarisers/Total/total.$QOS.$RETAIN.log
 done
 done
 done
