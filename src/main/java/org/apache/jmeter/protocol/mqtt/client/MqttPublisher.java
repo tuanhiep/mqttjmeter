@@ -325,9 +325,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					if("ROUND_ROBIN".equals(strategy)){
 						for(int j=0;j<length;j++){
 							if("TRUE".equals(isPerTopic)){
-								System.out.println("this is :"+j);
 								this.connectionArray[j].publish(topicArray[j],payload,quality, retained).await();
-						
 								total.incrementAndGet();
 							} else if("FALSE".equals(isPerTopic)){
 								this.connectionArray[0].publish(topicArray[j],payload,quality, retained).await();							
