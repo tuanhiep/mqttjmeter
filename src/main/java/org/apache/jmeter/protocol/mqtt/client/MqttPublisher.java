@@ -90,11 +90,18 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	public void setupTest(String host, String clientId, int size) {
 		try {
 			this.connectionArray= new FutureConnection[size];
-			for(int i = 0;i< size;i++){
-				this.connectionArray[i]= createConnection(host,clientId+" "+i);
-				this.connectionArray[i].connect().await();
+			if(size==1){
+				this.connectionArray[0]= createConnection(host,clientId);
+				this.connectionArray[0].connect().await();
 			}
-			
+			else 
+			{				
+				for(int i = 0;i< size;i++){
+					this.connectionArray[i]= createConnection(host,clientId+" "+i);
+					this.connectionArray[i].connect().await();
+				}
+			}
+					
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
 		}
@@ -103,11 +110,18 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	public void setupTest(String host, String clientId, String user, String password, int size) {
 		try {
 			this.connectionArray= new FutureConnection[size];
-			for(int i = 0;i< size;i++){
-				this.connectionArray[i]= createConnection(host,clientId+" "+i,user,password);
-				this.connectionArray[i].connect().await();
+			
+			if(size==1){
+				this.connectionArray[0]= createConnection(host,clientId,user,password);
+				this.connectionArray[0].connect().await();
+				
 			}
-	
+			else {
+				for(int i = 0;i< size;i++){
+					this.connectionArray[i]= createConnection(host,clientId+" "+i,user,password);
+					this.connectionArray[i].connect().await();
+				 }
+				 }				
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
 		}
