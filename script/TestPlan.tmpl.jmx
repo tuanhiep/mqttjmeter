@@ -28,7 +28,7 @@
       <hashTree>
         <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher" enabled="true">
           <stringProp name="mqtt.provider_url">tcp://localhost:1883</stringProp>
-          <stringProp name="mqtt.topic">LIG</stringProp>
+          <stringProp name="mqtt.topic">__TOPIC__</stringProp>
           <stringProp name="mqtt.security_principle"></stringProp>
           <stringProp name="mqtt.security_credentials"></stringProp>
           <stringProp name="mqtt.text_message"></stringProp>
@@ -40,18 +40,18 @@
           <stringProp name="mqtt.type_fixed_value">mqtt_int_value</stringProp>
           <stringProp name="mqtt.fixed_value"></stringProp>
           <stringProp name="mqtt.type_random_value">mqtt_pseudo_random</stringProp>
-          <stringProp name="mqtt.max_random_value">999</stringProp>
+          <stringProp name="mqtt.max_random_value">9999</stringProp>
           <stringProp name="mqtt.min_random_value">9</stringProp>
           <stringProp name="mqtt.type_generated_value">mqtt_float_value</stringProp>
           <stringProp name="mqtt.seed">5</stringProp>
           <boolProp name="mqtt.use_timestamp">false</boolProp>
           <boolProp name="mqtt.use_number_sequence">false</boolProp>
-          <stringProp name="mqtt.clientid">Hiep</stringProp>
+          <stringProp name="mqtt.clientid">__CLIENT_ID__</stringProp>
           <stringProp name="mqtt.format">mqtt_no_encoding</stringProp>
           <stringProp name="mqtt.charset">UTF-8</stringProp>
           <stringProp name="mqtt.size_array"></stringProp>
           <stringProp name="mqtt.strategy">mqtt_round_robin</stringProp>
-          <boolProp name="mqtt.one_connection_per_topic">true</boolProp>
+          <boolProp name="mqtt.one_connection_per_topic">false</boolProp>
         </org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler>
         <hashTree/>
       </hashTree>

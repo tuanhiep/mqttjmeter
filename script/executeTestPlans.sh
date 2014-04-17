@@ -1,20 +1,34 @@
 #!/bin/bash
 
-echo Please read 16.7 Reducing resource requirements http://jmeter.apache.org/usermanual/best-practices.html
-echo Please read 2.4.3 2.4.7 http://jmeter.apache.org/usermanual/get-started.html
-echo Please read http://jmeter.apache.org/usermanual/jmeter_distributed_testing_step_by_step.pdf
+#echo Please read 16.7 Reducing resource requirements http://jmeter.apache.org/usermanual/best-practices.html
+#echo Please read 2.4.3 2.4.7 http://jmeter.apache.org/usermanual/get-started.html
+#echo Please read http://jmeter.apache.org/usermanual/jmeter_distributed_testing_step_by_step.pdf
 
 ANUMCLIENT=( 100 1000 10000)
 AQOS=(0 1 2)
 ARETAIN=(true false)
 
-JMETERSERVERS=192.168.0.10,192.168.0.11,192.168.0.12,192.168.0.13,192.168.0.14
+JMETERSERVERS=localhost
 
 if [ ! -z "$JMETERSERVERS" ]
 then
-    REMOTE='--remotestart $JMETERSERVERS'
+    REMOTE="-R $JMETERSERVERS"
 fi 
-
+if [ -d "Logs" ]
+then 
+  	rm -r Logs   
+fi
+	mkdir Logs
+if [ -d "Results" ]
+then 
+ 	rm -r Results 
+fi	
+	mkdir Results
+if [ -d "Summarisers" ]
+then
+        rm -r Summarisers
+fi
+	mkdir Summarisers
 for NUMCLIENT in ${ANUMCLIENT[*]}
 do
 for QOS in ${AQOS[*]}
@@ -22,8 +36,9 @@ do
 for RETAIN in ${ARETAIN[*]}
 do
         SUFFIX=$NUMCLIENT.$QOS.$RETAIN
-	running testplan.$SUFFIX.jmx
-	$JMETER_HOME/bin/jmeter --nongui --testfile testplan.$SUFFIX.jmx --logfile result.$SUFFIX.jtl --jmeterlogfile log.$SUFFIX.log $REMOTE
+	echo "running testplan.$SUFFIX.jmx"
+	./../jmeter -n -t TestPlans/testplan.$SUFFIX.jmx -p specific.properties -l Results/result.$SUFFIX.jtl -j Logs/log.$SUFFIX.log #$REMOTE
+        cat Logs/log.$SUFFIX.log | grep 'Summariser' > Summarisers/summariser.$SUFFIX.log
 done
 done
 done
