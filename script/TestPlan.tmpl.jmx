@@ -15,7 +15,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
+          <stringProp name="LoopController.loops">__LOOP_COUNT__</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">__NUMCLIENT__</stringProp>
         <stringProp name="ThreadGroup.ramp_time">__RAMP_TIME__</stringProp>
@@ -33,7 +33,7 @@
           <stringProp name="mqtt.security_credentials"></stringProp>
           <stringProp name="mqtt.text_message"></stringProp>
           <stringProp name="mqtt.config_msg_type">mqtt_generated_value</stringProp>
-          <stringProp name="mqtt.iterations">5</stringProp>
+          <stringProp name="mqtt.iterations">__NUMBER_SAMPLE__</stringProp>
           <boolProp name="mqtt.authenticate">false</boolProp>
           <stringProp name="mqtt.quality">__QOS__</stringProp>
           <boolProp name="mqtt.retain">__RETAIN__</boolProp>

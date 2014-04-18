@@ -4,14 +4,12 @@
 #echo Please read 2.4.3 2.4.7 http://jmeter.apache.org/usermanual/get-started.html
 #echo Please read http://jmeter.apache.org/usermanual/jmeter_distributed_testing_step_by_step.pdf
 #ANUMCLIENT=(10 100 1000 10000)
-i=0
-for ((c=100;c<=10000;c=c+200))
-
+i=0 # loop count number
+step=200 # step for number of clients 
+for ((c=100;c<=10000;c=c+$step))
 do
-	
 	ANUMCLIENT[$i]=$c;
 	i=$i+1;
-
 done
 AQOS=(0 1 2)
 ARETAIN=(true false)
