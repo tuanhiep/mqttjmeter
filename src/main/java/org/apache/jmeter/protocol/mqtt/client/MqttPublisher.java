@@ -124,7 +124,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 					this.connectionArray[i]= createConnection(host,clientId+" "+jmcx.getThreadNum()+" "+i,user,password);
 					this.connectionArray[i].connect().await();
 				 }
-				 }				
+				 }
+			getLogger().info("Connection successful..");
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
 		}
