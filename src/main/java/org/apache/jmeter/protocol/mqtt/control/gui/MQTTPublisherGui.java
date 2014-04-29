@@ -53,7 +53,6 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		ChangeListener {
 
 	private static final long serialVersionUID = 240L;
-
 	/** Take source from the named file */
 	public static final String USE_FILE_RSC = "mqtt_use_file"; //$NON-NLS-1$
 	/** Take source from a random file */
@@ -119,6 +118,8 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	private final JLabeledRadioI18N msgFormat = new JLabeledRadioI18N("mqtt_message_format", MSGFORMAT_ITEMS,NO_ENCODING); //$NON-NLS-1$
 	private final JLabeledRadioI18N topicChoice = new JLabeledRadioI18N("mqtt_topic_choice", TOPIC_CHOICES,ROUND_ROBIN); //$NON-NLS-1$
 	private final JCheckBox connectionPerTopic = new JCheckBox(JMeterUtils.getResString("mqtt_connection_per_topic"), false); // $NON-NLS-1$
+	private final JCheckBox suffixClientId = new JCheckBox(JMeterUtils.getResString("mqtt_suffix_client_id"),true); // $NON-NLS-1$
+	private final JLabeledTextField suffixLength = new JLabeledTextField(JMeterUtils.getResString("mqtt_suffix_length")); //$NON-NLS-1$
 	// For messages content
 	private final JCheckBox useTimeStamp = new JCheckBox(JMeterUtils.getResString("mqtt_use_time_stamp"), false); // $NON-NLS-1$
 	private final JCheckBox useNumberSeq = new JCheckBox(JMeterUtils.getResString("mqtt_use_number_seq"), false); // $NON-NLS-1$
@@ -150,7 +151,9 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		JPanel DPanel = new JPanel();
 		DPanel.setLayout(new BoxLayout(DPanel, BoxLayout.X_AXIS));
 		DPanel.add(urlField);
-		DPanel.add(clientId);		
+		DPanel.add(clientId);
+		DPanel.add(suffixClientId);
+		DPanel.add(suffixLength);
 		JPanel ControlPanel = new VerticalPanel();
 		ControlPanel.add(DPanel);
 		ControlPanel.add(createDestinationPane());
@@ -219,6 +222,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		typeQoSValue.addChangeListener(this);
 		typeRandom.addChangeListener(this);
 	 	msgFormat.addChangeListener(this);
+	 	suffixClientId.addChangeListener(this);
 	
 	}
 
@@ -310,9 +314,10 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
         sampler.setSIZE_ARRAY(this.sizeArray.getText());
         sampler.setSTRATEGY(this.topicChoice.getText());
         sampler.setOneConnectionPerTopic(this.connectionPerTopic.isSelected());
+        sampler.setRandomSuffix(this.suffixClientId.isSelected());
+        sampler.setLength(this.suffixLength.getText());
 	}
 		
-	
 	/**
 	 * the implementation loads the URL and the soap action for the request.
 	 */
@@ -334,6 +339,7 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		destSetup.setText(sampler.isDestinationStatic() ? DEST_SETUP_STATIC	: DEST_SETUP_DYNAMIC);
 		updateChoice(msgChoice.getText());
 		updateChoice(msgFormat.getText());
+		updateChoice("Suffix="+String.valueOf(this.suffixClientId.isSelected()));
 	
 	}
 	
@@ -386,6 +392,9 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		} 
 		else if (event.getSource()==msgFormat){
 			updateChoice(msgFormat.getText());
+		} 
+		else if(event.getSource()==suffixClientId){
+			updateChoice("Suffix="+String.valueOf(this.suffixClientId.isSelected()));
 		}
 	}
 
@@ -455,6 +464,13 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		}
 		else if(NO_ENCODING.equals(command)){
 			this.CharsetChooser.setVisible(false);
+		}
+		else if("suffix=true".equalsIgnoreCase(command)){
+			this.suffixLength.setVisible(true);
+			
+		}
+		else if("suffix=false".equalsIgnoreCase(command)){
+			this.suffixLength.setVisible(false);
 		}
 		validate();
 	}

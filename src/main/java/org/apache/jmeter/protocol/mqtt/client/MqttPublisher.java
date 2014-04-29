@@ -30,7 +30,6 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.codec.binary.Hex;
@@ -68,6 +67,9 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	public void setupTest(JavaSamplerContext context) {
 		String host = context.getParameter("HOST");
 		String clientId = context.getParameter("CLIENT_ID");
+		if("TRUE".equalsIgnoreCase(context.getParameter("RANDOM_SUFFIX"))){
+		clientId= MqttPublisher.getClientId(clientId,Integer.parseInt(context.getParameter("SUFFIX_LENGTH")));	
+		}
 		if("FALSE".equals(context.getParameter("PER_TOPIC"))){			
 			if("TRUE".equals(context.getParameter("AUTH"))){			
 				setupTest(host,clientId,context.getParameter("USER"),context.getParameter("PASSWORD"),1);		
@@ -424,11 +426,8 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		try {
 
 			result.sampleStart(); // start stopwatch
-
 			produce(context);
-
 			result.sampleEnd(); // stop stopwatch
-
 			result.setSuccessful(true);
 			result.setResponseMessage("Sent " + total.get() + " messages total");
 			result.setResponseCode("OK");
@@ -645,4 +644,18 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 	
 				
 	}
+	
+	private static final String mycharset = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public static String getClientId(String clientPrefix, int suffixLength) {
+	    Random rand = new Random(System.nanoTime()*System.currentTimeMillis());
+	    StringBuilder sb = new StringBuilder();
+	    sb.append(clientPrefix);
+	    for (int i = 0; i < suffixLength; i++) {
+	        int pos = rand.nextInt(mycharset.length());
+	        sb.append(mycharset.charAt(pos));
+	    }
+	    return sb.toString();
+	}
+
+
 }

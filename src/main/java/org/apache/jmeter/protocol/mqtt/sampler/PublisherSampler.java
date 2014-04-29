@@ -24,7 +24,6 @@ package org.apache.jmeter.protocol.mqtt.sampler;
 
 import java.io.IOException;
 import java.util.Date;
-
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.protocol.mqtt.client.MqttPublisher;
@@ -58,6 +57,8 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static String SIZE_ARRAY = "mqtt.size_array"; //$NON-NLS-1$
 	private static String STRATEGY = "mqtt.strategy"; //$NON-NLS-1$
 	private static String OneConnectionPerTopic = "mqtt.one_connection_per_topic"; //$NON-NLS-1$
+	private static String RandomSuffix="mqtt.random_suffix_client_id";//$NON-NLS-1$
+	private static String Length="mqtt.suffix.length";//$NON-NLS-1$
 	public transient MqttPublisher producer = null;
 
 	private JavaSamplerContext context = null;
@@ -70,10 +71,42 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	}
 
 	// ---------------------Get/Set Property--------------------------//
-
+		
+	
+	
+	
+	
+	
+	
+	
 	public void setTYPE_FIXED_VALUE(String type) {
 		setProperty(TYPE_FIXED_VALUE, type);
 
+	}
+
+	public  String getLength() {
+		return Length;
+	}
+
+	public  void setLength(String length) {
+		Length = length;
+	}
+
+	public boolean useRandomSuffix() {
+		
+		String randomSuffix = getPropertyAsString(RandomSuffix);
+		if("TRUE".equalsIgnoreCase(randomSuffix)){
+			return true;
+		}
+		else {
+			return false;
+		}
+		
+	}
+
+	public void setRandomSuffix(boolean randomSuffix) {
+		setProperty(RandomSuffix,randomSuffix);
+		
 	}
 
 	public boolean isOneConnectionPerTopic() {
@@ -385,6 +418,13 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	    } else {
 			parameters.addArgument("PER_TOPIC", "FALSE");
 				}
+		if(this.useRandomSuffix()){
+			parameters.addArgument("RANDOM_SUFFIX","TRUE");
+			parameters.addArgument("SUFFIX_LENGTH",this.getLength());
+		}else {
+			parameters.addArgument("RANDOM_SUFFIX","FALSE");
+		}
+		
 		this.context = new JavaSamplerContext(parameters);
 		this.producer.setupTest(this.context);
 	}
