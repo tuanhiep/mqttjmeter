@@ -28,21 +28,14 @@ import org.apache.jmeter.util.JMeterUtils;
 
 public abstract class BaseMQTTSampler extends AbstractSampler {
     private static final long serialVersionUID = 240L;
-    //++ These are JMX file attribute names and must not be changed
     private static final String PROVIDER_URL = "mqtt.provider_url"; // $NON-NLS-1$
-    // N.B. Cannot change value, as that is used in JMX files
     private static final String DEST = "mqtt.topic"; // $NON-NLS-1$
     private static final String PRINCIPAL = "mqtt.security_principle"; // $NON-NLS-1$
     private static final String CREDENTIALS = "mqtt.security_credentials"; // $NON-NLS-1$
     private static final String ITERATIONS = "mqtt.iterations"; // $NON-NLS-1$
     private static final String USE_AUTH = "mqtt.authenticate"; // $NON-NLS-1$
-    // Is Destination setup static? else dynamic
-    private static final String DESTINATION_STATIC = "mqtt.destination_static"; // $NON-NLS-1$
-    private static final boolean DESTINATION_STATIC_DEFAULT = true; // default to maintain compatibility
-    //-- End of JMX file attribute names
-    // See BUG 45460. We need to keep the resource in order to interpret existing files
     private static final String REQUIRED = JMeterUtils.getResString("mqtt_auth_required"); // $NON-NLS-1$
-    private static final String READ_RESPONSE = "mqtt.read_response"; // $NON-NLS-1$
+ 
    
     /**
      * Constructor
@@ -168,39 +161,6 @@ public abstract class BaseMQTTSampler extends AbstractSampler {
         final String useAuth = getPropertyAsString(USE_AUTH);
         return useAuth.equalsIgnoreCase("true") || useAuth.equals(REQUIRED); // $NON-NLS-1$
     }
-    /**
-     * if the sampler should use a static destination, call the method with true
-     *
-     * @param isStatic
-     */
-    public void setDestinationStatic(boolean isStatic) {
-        setProperty(DESTINATION_STATIC, isStatic, DESTINATION_STATIC_DEFAULT);
-    }
-
-    /**
-     * return whether the sampler should use a static destination.
-     *
-     * @return  whether the sampler should use a static destination.
-     */
-    public boolean isDestinationStatic(){
-        return getPropertyAsBoolean(DESTINATION_STATIC, DESTINATION_STATIC_DEFAULT);
-    }
-    
-    /**
-     * set whether the sampler should read the response or not
-     *
-     * @param read whether the sampler should read the response or not
-     */
-    public void setReadResponse(String read) {
-        setProperty(READ_RESPONSE, read);
-    }
-    /**
-     * return whether the sampler should read the response as a boolean value
-     *
-     * @return whether the sampler should read the response as a boolean value
-     */
-    public boolean getReadResponseAsBoolean() {
-        return getPropertyAsBoolean(READ_RESPONSE);
-    }
+ 
 	
 }

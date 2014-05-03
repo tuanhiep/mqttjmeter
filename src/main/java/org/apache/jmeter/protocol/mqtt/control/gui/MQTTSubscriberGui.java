@@ -22,7 +22,9 @@
 
 package org.apache.jmeter.protocol.mqtt.control.gui;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -45,31 +47,22 @@ import org.apache.jorphan.gui.JLabeledTextField;
 public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListener {
 
     private static final long serialVersionUID = 240L;
-
+    public static final String ROUND_ROBIN = "mqtt_round_robin";// $NON-NLS-1$
+    public static final String RANDOM = "mqtt_random";// $NON-NLS-1$
+    private static final String[] TOPIC_CHOICES={ROUND_ROBIN,RANDOM};
     private final JLabeledTextField urlField = new JLabeledTextField(JMeterUtils.getResString("mqtt_provider_url")); // $NON-NLS-1$
     private final JLabeledTextField mqttDestination = new JLabeledTextField(JMeterUtils.getResString("mqtt_topic")); // $NON-NLS-1$
     private final JLabeledTextField mqttUser = new JLabeledTextField(JMeterUtils.getResString("mqtt_user")); // $NON-NLS-1$
     private final JLabeledTextField mqttPwd = new JLabeledPasswordField(JMeterUtils.getResString("mqtt_pwd")); // $NON-NLS-1$
     private final JLabeledTextField iterations = new JLabeledTextField(JMeterUtils.getResString("mqtt_itertions")); // $NON-NLS-1$
     private final JCheckBox useAuth = new JCheckBox(JMeterUtils.getResString("mqtt_use_auth"), false); //$NON-NLS-1$
-    private final JCheckBox readResponse = new JCheckBox(JMeterUtils.getResString("mqtt_read_response"), true); // $NON-NLS-1$
     private final JLabeledTextField timeout =  new JLabeledTextField(JMeterUtils.getResString("mqtt_timeout")); //$NON-NLS-1$
     private final JLabeledTextField separator =  new JLabeledTextField(JMeterUtils.getResString("mqtt_separator")); //$NON-NLS-1$
-
-    //++ Do not change these strings; they are used in JMX files to record the button settings
-    public static final String RECEIVE_RSC = "mqtt_subscriber_receive"; // $NON-NLS-1$
-    public static final String ON_MESSAGE_RSC = "mqtt_subscriber_on_message"; // $NON-NLS-1$
-  
-    // Button group resources
-    private static final String[] CLIENT_ITEMS = { RECEIVE_RSC, ON_MESSAGE_RSC };
-    private final JLabeledRadioI18N clientChoice = new JLabeledRadioI18N("mqtt_client_type", CLIENT_ITEMS, RECEIVE_RSC); // $NON-NLS-1$
+    private final JCheckBox suffixClientId = new JCheckBox(JMeterUtils.getResString("mqtt_suffix_client_id"),true); // $NON-NLS-1$
+    private final JLabeledTextField suffixLength = new JLabeledTextField(JMeterUtils.getResString("mqtt_suffix_length")); //$NON-NLS-1$
+    private final JCheckBox connectionPerTopic = new JCheckBox(JMeterUtils.getResString("mqtt_connection_per_topic"), false); // $NON-NLS-1$
+    private final JLabeledRadioI18N topicChoice = new JLabeledRadioI18N("mqtt_topic_choice", TOPIC_CHOICES,ROUND_ROBIN); //$NON-NLS-1$
     private final JCheckBox stopBetweenSamples = new JCheckBox(JMeterUtils.getResString("mqtt_stop_between_samples"), true); // $NON-NLS-1$
-    // These are the names of properties used to define the labels
-    private static final String DEST_SETUP_STATIC = "mqtt_dest_setup_static"; // $NON-NLS-1$
-    private static final String DEST_SETUP_DYNAMIC = "mqtt_dest_setup_dynamic"; // $NON-NLS-1$
-    // Button group resources
-    private static final String[] DEST_SETUP_ITEMS = { DEST_SETUP_STATIC, DEST_SETUP_DYNAMIC };
-    private final JLabeledRadioI18N destSetup =  new JLabeledRadioI18N("mqtt_dest_setup", DEST_SETUP_ITEMS, DEST_SETUP_STATIC); // $NON-NLS-1$
     private final JLabeledTextField clientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); //$NON-NLS-1$
     
     public MQTTSubscriberGui() {
@@ -108,31 +101,39 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         sampler.setUseAuth(useAuth.isSelected());
         sampler.setIterations(iterations.getText());
         sampler.setTimeout(timeout.getText());
-        sampler.setDestinationStatic(destSetup.getText().equals(DEST_SETUP_STATIC));
-
+        sampler.setRandomSuffix(this.suffixClientId.isSelected());
+        sampler.setLength(this.suffixLength.getText());
+        sampler.setOneConnectionPerTopic(this.connectionPerTopic.isSelected());
+        sampler.setSTRATEGY(this.topicChoice.getText());
     }
 
-    /**
-     * init() adds jndiICF to the mainPanel. The class reuses logic from
-     * SOAPSampler, since it is common.
-     */
     private void init() {
         setLayout(new BorderLayout());
         setBorder(makeBorder());
         add(makeTitlePanel(), BorderLayout.NORTH);
         JPanel mainPanel = new VerticalPanel();
-        add(mainPanel, BorderLayout.CENTER);      
-        
+        add(mainPanel, BorderLayout.CENTER);              
         JPanel DPanel = new JPanel();
 		DPanel.setLayout(new BoxLayout(DPanel, BoxLayout.X_AXIS));
 		DPanel.add(urlField);
-		DPanel.add(clientId);		
-		mainPanel.add(DPanel);
-		mainPanel.add(createDestinationPane());
-		mainPanel.add(createAuthPane());
-        mainPanel.add(iterations);
-        mainPanel.add(timeout);             
-        useAuth.addChangeListener(this);
+		DPanel.add(clientId);	
+		DPanel.add(suffixClientId);
+		DPanel.add(suffixLength);
+		JPanel ControlPanel = new VerticalPanel();
+		ControlPanel.add(DPanel);
+		ControlPanel.add(createDestinationPane());
+		ControlPanel.add(createAuthPane());
+		ControlPanel.add(iterations);
+		ControlPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection Info"));
+		mainPanel.add(ControlPanel);	
+		JPanel TPanel = new JPanel();
+		TPanel.setLayout(new BoxLayout(TPanel, BoxLayout.X_AXIS));
+		timeout.setLayout(new BoxLayout(timeout, BoxLayout.X_AXIS));
+		TPanel.add(timeout);
+		TPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection"));
+		mainPanel.add(TPanel);
+		useAuth.addChangeListener(this);
+		suffixClientId.addChangeListener(this);
     }
     /**
 	 * 
@@ -164,9 +165,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         useAuth.setSelected(sampler.isUseAuth());
         mqttUser.setEnabled(useAuth.isSelected());
         mqttPwd.setEnabled(useAuth.isSelected());
-        readResponse.setSelected(sampler.getReadResponseAsBoolean());
-        timeout.setText(sampler.getTimeout());
-        destSetup.setText(sampler.isDestinationStatic() ? DEST_SETUP_STATIC : DEST_SETUP_DYNAMIC);
+        timeout.setText(sampler.getTimeout());       
     }
 
     @Override
@@ -183,10 +182,8 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         useAuth.setSelected(false);
         mqttUser.setEnabled(false);
         mqttPwd.setEnabled(false);
-        readResponse.setSelected(true);
-        clientChoice.setText(RECEIVE_RSC);
         stopBetweenSamples.setSelected(false);
-        destSetup.setText(DEST_SETUP_STATIC);
+      
     }
 
     /**
@@ -199,11 +196,34 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
             mqttUser.setEnabled(useAuth.isSelected());
             mqttPwd.setEnabled(useAuth.isSelected());
         }
+        else if(event.getSource()==suffixClientId){
+			updateChoice("Suffix="+String.valueOf(this.suffixClientId.isSelected()));
+		}
     }
     
-    private JPanel createDestinationPane() {
-        JPanel pane = new JPanel(new BorderLayout(3, 0));
-        pane.add(mqttDestination, BorderLayout.CENTER);
-        return pane;
-    }
+    private void updateChoice(String command) {
+    	if("suffix=true".equalsIgnoreCase(command)){
+			this.suffixLength.setVisible(true);			
+		}
+		else if("suffix=false".equalsIgnoreCase(command)){
+			this.suffixLength.setVisible(false);
+		}
+		validate();		
+	}
+
+	private JPanel createDestinationPane() {
+        JPanel panel = new VerticalPanel(); //new BorderLayout(3, 0)
+		this.mqttDestination.setLayout((new BoxLayout(mqttDestination, BoxLayout.X_AXIS)));
+		panel.add(mqttDestination);
+		JPanel TPanel = new JPanel();
+		TPanel.setLayout(new BoxLayout(TPanel,BoxLayout.X_AXIS));		
+		this.connectionPerTopic.setLayout(new BoxLayout(connectionPerTopic,BoxLayout.X_AXIS));
+		this.connectionPerTopic.setAlignmentX(CENTER_ALIGNMENT);
+		TPanel.add(connectionPerTopic);
+		TPanel.add(Box.createHorizontalStrut(100));
+		this.topicChoice.setLayout(new BoxLayout(topicChoice,BoxLayout.X_AXIS));
+		TPanel.add(topicChoice);
+		panel.add(TPanel);
+		return panel;
+     }
 }

@@ -81,15 +81,12 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	
 	public void setTYPE_FIXED_VALUE(String type) {
 		setProperty(TYPE_FIXED_VALUE, type);
-
 	}
-
 	public  String getLength() {
-		return Length;
+		return getPropertyAsString(Length);
 	}
-
 	public  void setLength(String length) {
-		Length = length;
+		setProperty(Length,length);
 	}
 
 	public boolean useRandomSuffix() {
@@ -120,7 +117,6 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 		}
        
 	}
-
 	public void setOneConnectionPerTopic(boolean oneConnectionPerTopic) {
 
 		setProperty(OneConnectionPerTopic, oneConnectionPerTopic);

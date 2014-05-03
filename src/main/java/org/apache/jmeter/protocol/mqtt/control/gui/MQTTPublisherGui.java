@@ -336,7 +336,6 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 		useAuth.setSelected(sampler.isUseAuth());
 		mqttUser.setEnabled(useAuth.isSelected());
 		mqttPwd.setEnabled(useAuth.isSelected());
-		destSetup.setText(sampler.isDestinationStatic() ? DEST_SETUP_STATIC	: DEST_SETUP_DYNAMIC);
 		updateChoice(msgChoice.getText());
 		updateChoice(msgFormat.getText());
 		updateChoice("Suffix="+String.valueOf(this.suffixClientId.isSelected()));
@@ -373,8 +372,6 @@ public class MQTTPublisherGui extends AbstractSamplerGui implements
 	public void modifyTestElement(TestElement s) {
 		PublisherSampler sampler = (PublisherSampler) s;
 		setupSamplerProperties(sampler);
-		sampler.setDestinationStatic(destSetup.getText().equals(DEST_SETUP_STATIC));
-
 	}
 
 	/**
