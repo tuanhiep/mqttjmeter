@@ -93,17 +93,16 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 			this.connectionArray= new FutureConnection[size];
 			JMeterContext jmcx = JMeterContextService.getContext();
 			if(size==1){
-				this.connectionArray[0]=createConnection(host, clientId+jmcx.getThreadNum(), durable,user,password);
+				this.connectionArray[0]=createConnection(host,clientId+jmcx.getThreadNum(), durable,user,password);
 				this.connectionArray[0].connect().await();
 				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic, qos)}).await();
-				
-			}
+						}
 			else if(size>1){				
 				String[] topicArray = topic.split("\\s*,\\s*");
 			for(int j=0;j<size;j++){
-				this.connectionArray[j]=createConnection(host, clientId+jmcx.getThreadNum()+j, durable,user,password);
+				this.connectionArray[j]=createConnection(host,clientId+jmcx.getThreadNum()+j, durable,user,password);
 				this.connectionArray[j].connect().await();
-				this.connectionArray[j].subscribe(new Topic[]{new Topic(topicArray[j], qos)}).await();					
+				this.connectionArray[j].subscribe(new Topic[]{new Topic(topicArray[j],qos)}).await();					
 			}
 			}
 		} catch (Exception e) {
@@ -127,8 +126,7 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 			if(size==1){
 				this.connectionArray[0]=createConnection(host, clientId+jmcx.getThreadNum(), durable);
 				this.connectionArray[0].connect().await();
-				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic,qos)}).await();
-	
+				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic,qos)}).await();	
 			}
 			else if(size>1){
 				String[] topicArray = topic.split("\\s*,\\s*");
@@ -171,8 +169,10 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 	}
 
 	private void consume(int aggregate,long timeout,int size) throws Exception{
-		for(int i = 1; i <= aggregate; ++i){
+		for(int i = 0; i <= aggregate;i++){
+			
 			for(int j=0;j<size;j++){
+				
 				Message msg = this.connectionArray[j].receive().await(timeout, TimeUnit.MILLISECONDS);
 				if(msg == null){
 					getLogger().error("MQTT consumer timed out while waiting for a message. The test has been aborted.");
