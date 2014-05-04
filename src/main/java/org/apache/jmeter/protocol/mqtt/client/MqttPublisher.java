@@ -95,13 +95,13 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			JMeterContext jmcx = JMeterContextService.getContext();
 			this.connectionArray= new FutureConnection[size];
 			if(size==1){
-				this.connectionArray[0]= createConnection(host,clientId+" "+jmcx.getThreadNum());
+				this.connectionArray[0]= createConnection(host,clientId+jmcx.getThreadNum());
 				this.connectionArray[0].connect().await();
 			}
 			else 
 			{				
 				for(int i = 0;i< size;i++){
-					this.connectionArray[i]= createConnection(host,clientId+" "+jmcx.getThreadNum()+" "+i);
+					this.connectionArray[i]= createConnection(host,clientId+jmcx.getThreadNum()+i);
 					this.connectionArray[i].connect().await();
 				}
 			}
@@ -117,13 +117,13 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			this.connectionArray= new FutureConnection[size];
 			
 			if(size==1){
-				this.connectionArray[0]= createConnection(host,clientId+" "+jmcx.getThreadNum(),user,password);
+				this.connectionArray[0]= createConnection(host,clientId+jmcx.getThreadNum(),user,password);
 				this.connectionArray[0].connect().await();
 				
 			}
 			else {
 				for(int i = 0;i< size;i++){
-					this.connectionArray[i]= createConnection(host,clientId+" "+jmcx.getThreadNum()+" "+i,user,password);
+					this.connectionArray[i]= createConnection(host,clientId+jmcx.getThreadNum()+i,user,password);
 					this.connectionArray[i].connect().await();
 				 }
 				 }
