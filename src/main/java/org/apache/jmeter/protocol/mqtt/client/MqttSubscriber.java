@@ -25,10 +25,10 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.apache.jmeter.protocol.mqtt.control.gui.MQTTSubscriberGui;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.threads.JMeterContextService;
@@ -63,57 +63,79 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 		if("FALSE".equals(context.getParameter("PER_TOPIC"))){
 			String topic= context.getParameter("TOPIC");
 			if("TRUE".equals(context.getParameter("AUTH"))){			
-				setupTest(host,clientId,topic,context.getParameter("USER"),context.getParameter("PASSWORD"),1,Boolean.parseBoolean(context.getParameter("DURABLE")));		
+				setupTest(host,clientId,topic,context.getParameter("USER"),context.getParameter("PASSWORD"),1,Boolean.parseBoolean(context.getParameter("DURABLE")),context.getParameter("QOS"));		
 				}
-				else{	setupTest(host, clientId,topic,1,Boolean.parseBoolean(context.getParameter("DURABLE")));}		
+				else{	setupTest(host, clientId,topic,1,Boolean.parseBoolean(context.getParameter("DURABLE")),context.getParameter("QOS"));}		
 		}
 		else if("TRUE".equals(context.getParameter("PER_TOPIC"))){
 			String topics= context.getParameter("TOPIC");
 			String[] topicArray = topics.split("\\s*,\\s*");
 			int size= topicArray.length;		
 			if("TRUE".equals(context.getParameter("AUTH"))){			
-				setupTest(host,clientId,topics,context.getParameter("USER"),context.getParameter("PASSWORD"),size,Boolean.parseBoolean(context.getParameter("DURABLE")));		
+				setupTest(host,clientId,topics,context.getParameter("USER"),context.getParameter("PASSWORD"),size,Boolean.parseBoolean(context.getParameter("DURABLE")),context.getParameter("QOS"));		
 				}
-				else {	setupTest(host, clientId,topics,size,Boolean.parseBoolean(context.getParameter("DURABLE")));
+				else {	setupTest(host, clientId,topics,size,Boolean.parseBoolean(context.getParameter("DURABLE")),context.getParameter("QOS"));
 				}
 		    }
 		}
-	private void setupTest(String host,String clientId, String topic, String user,String password,int size, boolean durable){
+	private void setupTest(String host,String clientId, String topic, String user,String password,int size, boolean durable,String quality){
 		try {
+
+			// Quality
+			QoS qos=null;
+			if (MQTTSubscriberGui.EXACTLY_ONCE.equals(quality)) {
+				qos = QoS.EXACTLY_ONCE;
+			} else if (MQTTSubscriberGui.AT_LEAST_ONCE.equals(quality)) {
+				qos = QoS.AT_LEAST_ONCE;
+			} else if (MQTTSubscriberGui.AT_MOST_ONCE.equals(quality)) {
+				qos = QoS.AT_MOST_ONCE;
+			}
 			this.connectionArray= new FutureConnection[size];
 			JMeterContext jmcx = JMeterContextService.getContext();
 			if(size==1){
-				this.connectionArray[0]=createConnection(host, clientId+" "+jmcx.getThreadNum(), durable,user,password);
+				this.connectionArray[0]=createConnection(host, clientId+jmcx.getThreadNum(), durable,user,password);
 				this.connectionArray[0].connect().await();
-				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic, QoS.EXACTLY_ONCE)}).await();
+				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic, qos)}).await();
+				
 			}
 			else if(size>1){				
 				String[] topicArray = topic.split("\\s*,\\s*");
 			for(int j=0;j<size;j++){
-				this.connectionArray[j]=createConnection(host, clientId+" "+jmcx.getThreadNum()+""+j, durable,user,password);
+				this.connectionArray[j]=createConnection(host, clientId+jmcx.getThreadNum()+j, durable,user,password);
 				this.connectionArray[j].connect().await();
-				this.connectionArray[j].subscribe(new Topic[]{new Topic(topicArray[j], QoS.EXACTLY_ONCE)}).await();					
+				this.connectionArray[j].subscribe(new Topic[]{new Topic(topicArray[j], qos)}).await();					
 			}
 			}
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
 		}
 	}
-	private void setupTest(String host, String clientId, String topic,int size, boolean durable){
+	private void setupTest(String host, String clientId, String topic,int size, boolean durable,String quality){
 		try {
+			// Quality
+			QoS qos=null;
+			if (MQTTSubscriberGui.EXACTLY_ONCE.equals(quality)) {
+				qos = QoS.EXACTLY_ONCE;
+			} else if (MQTTSubscriberGui.AT_LEAST_ONCE.equals(quality)) {
+				qos = QoS.AT_LEAST_ONCE;
+			} else if (MQTTSubscriberGui.AT_MOST_ONCE.equals(quality)) {
+				qos = QoS.AT_MOST_ONCE;
+
+			}						
 			this.connectionArray= new FutureConnection[size];
 			JMeterContext jmcx = JMeterContextService.getContext();
 			if(size==1){
 				this.connectionArray[0]=createConnection(host, clientId+jmcx.getThreadNum(), durable);
 				this.connectionArray[0].connect().await();
-				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic, QoS.EXACTLY_ONCE)}).await();
+				this.connectionArray[0].subscribe(new Topic[]{new Topic(topic,qos)}).await();
+	
 			}
 			else if(size>1){
 				String[] topicArray = topic.split("\\s*,\\s*");
 				for(int j=0;j<size;j++){
 				this.connectionArray[j]=createConnection(host, clientId+jmcx.getThreadNum()+j, durable);
 				this.connectionArray[j].connect().await();
-				this.connectionArray[j].subscribe(new Topic[]{new Topic(topicArray[j], QoS.EXACTLY_ONCE)}).await();
+				this.connectionArray[j].subscribe(new Topic[]{new Topic(topicArray[j],qos)}).await();
 				}
 			}
 		} catch (Exception e) {
@@ -153,7 +175,6 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 			for(int j=0;j<size;j++){
 				Message msg = this.connectionArray[j].receive().await(timeout, TimeUnit.MILLISECONDS);
 				if(msg == null){
-					System.out.println("MQTT consumer timed out while waiting for a message. The test has been aborted.");
 					getLogger().error("MQTT consumer timed out while waiting for a message. The test has been aborted.");
 					return;
 				}
@@ -170,11 +191,8 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements Seriali
 		try {
 
 			result.sampleStart(); // start stopwatch
-
 			consume(context);
-
 			result.sampleEnd(); // stop stopwatch
-
 			result.setSuccessful( true );
 			result.setResponseMessage("Received " + context.getParameter("AGGREGATE") + " messages");
 			result.setResponseCode("OK");

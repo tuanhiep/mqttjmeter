@@ -53,6 +53,7 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	private static String Length = "mqtt.suffix.length";//$NON-NLS-1$
 	private static String RandomSuffix = "mqtt.random_suffix_client_id";//$NON-NLS-1$
 	private static String STRATEGY = "mqtt.strategy"; //$NON-NLS-1$
+	
 
 	public SubscriberSampler() {
 		super();
@@ -71,7 +72,9 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 		}
 
 	}
-
+	public void setQuality(String quality) {
+		setProperty(QUALITY, quality);
+	}
 	private String getQuality() {
 		return getPropertyAsString(QUALITY);
 	}

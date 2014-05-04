@@ -24,6 +24,7 @@ package org.apache.jmeter.protocol.mqtt.control.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -31,6 +32,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.apache.jmeter.gui.util.JLabeledRadioI18N;
 import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.protocol.mqtt.sampler.SubscriberSampler;
@@ -47,6 +49,10 @@ import org.apache.jorphan.gui.JLabeledTextField;
 public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListener {
 
     private static final long serialVersionUID = 240L;
+    public static final String AT_MOST_ONCE = "mqtt_at_most_once";// $NON-NLS-1$
+    public static final String EXACTLY_ONCE = "mqtt_extactly_once";// $NON-NLS-1$
+	public static final String AT_LEAST_ONCE = "mqtt_at_least_once";// $NON-NLS-1$
+    private static final String[] QTYPES_ITEMS = {AT_MOST_ONCE,AT_LEAST_ONCE,EXACTLY_ONCE};
     public static final String ROUND_ROBIN = "mqtt_round_robin";// $NON-NLS-1$
     public static final String RANDOM = "mqtt_random";// $NON-NLS-1$
     private static final String[] TOPIC_CHOICES={ROUND_ROBIN,RANDOM};
@@ -64,7 +70,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
     private final JLabeledRadioI18N topicChoice = new JLabeledRadioI18N("mqtt_topic_choice", TOPIC_CHOICES,ROUND_ROBIN); //$NON-NLS-1$
     private final JCheckBox stopBetweenSamples = new JCheckBox(JMeterUtils.getResString("mqtt_stop_between_samples"), true); // $NON-NLS-1$
     private final JLabeledTextField clientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); //$NON-NLS-1$
-    
+    private final JLabeledRadioI18N typeQoSValue = new JLabeledRadioI18N("mqtt_qos", QTYPES_ITEMS,AT_MOST_ONCE); //$NON-NLS-1$
     public MQTTSubscriberGui() {
         init();
     }
@@ -105,6 +111,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         sampler.setLength(this.suffixLength.getText());
         sampler.setOneConnectionPerTopic(this.connectionPerTopic.isSelected());
         sampler.setSTRATEGY(this.topicChoice.getText());
+        sampler.setQuality(typeQoSValue.getText());
     }
 
     private void init() {
@@ -126,11 +133,13 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
 		ControlPanel.add(iterations);
 		ControlPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection Info"));
 		mainPanel.add(ControlPanel);	
-		JPanel TPanel = new JPanel();
+		JPanel TPanel = new VerticalPanel();
 		TPanel.setLayout(new BoxLayout(TPanel, BoxLayout.X_AXIS));
 		timeout.setLayout(new BoxLayout(timeout, BoxLayout.X_AXIS));
+		typeQoSValue.setLayout(new BoxLayout(typeQoSValue, BoxLayout.X_AXIS));
+		TPanel.add(typeQoSValue);
 		TPanel.add(timeout);
-		TPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection"));
+		TPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Option"));
 		mainPanel.add(TPanel);
 		useAuth.addChangeListener(this);
 		suffixClientId.addChangeListener(this);
