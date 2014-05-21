@@ -60,7 +60,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
     private final JLabeledTextField mqttDestination = new JLabeledTextField(JMeterUtils.getResString("mqtt_topic")); // $NON-NLS-1$
     private final JLabeledTextField mqttUser = new JLabeledTextField(JMeterUtils.getResString("mqtt_user")); // $NON-NLS-1$
     private final JLabeledTextField mqttPwd = new JLabeledPasswordField(JMeterUtils.getResString("mqtt_pwd")); // $NON-NLS-1$
-    private final JLabeledTextField iterations = new JLabeledTextField(JMeterUtils.getResString("mqtt_itertions")); // $NON-NLS-1$
     private final JCheckBox useAuth = new JCheckBox(JMeterUtils.getResString("mqtt_use_auth"), false); //$NON-NLS-1$
     private final JLabeledTextField timeout =  new JLabeledTextField(JMeterUtils.getResString("mqtt_timeout")); //$NON-NLS-1$
     private final JLabeledTextField separator =  new JLabeledTextField(JMeterUtils.getResString("mqtt_separator")); //$NON-NLS-1$
@@ -105,7 +104,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         sampler.setUsername(mqttUser.getText());
         sampler.setPassword(mqttPwd.getText());
         sampler.setUseAuth(useAuth.isSelected());
-        sampler.setIterations(iterations.getText());
         sampler.setTimeout(timeout.getText());
         sampler.setRandomSuffix(this.suffixClientId.isSelected());
         sampler.setLength(this.suffixLength.getText());
@@ -130,7 +128,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
 		ControlPanel.add(DPanel);
 		ControlPanel.add(createDestinationPane());
 		ControlPanel.add(createAuthPane());
-		ControlPanel.add(iterations);
 		ControlPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection Info"));
 		mainPanel.add(ControlPanel);	
 		JPanel TPanel = new VerticalPanel();
@@ -170,7 +167,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         clientId.setText(sampler.getClientId());    
         mqttUser.setText(sampler.getUsername());
         mqttPwd.setText(sampler.getPassword());
-        iterations.setText(sampler.getIterations());
         useAuth.setSelected(sampler.isUseAuth());
         mqttUser.setEnabled(useAuth.isSelected());
         mqttPwd.setEnabled(useAuth.isSelected());
@@ -185,7 +181,6 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         clientId.setText(""); // $NON-NLS-1$     
         mqttUser.setText(""); // $NON-NLS-1$
         mqttPwd.setText(""); // $NON-NLS-1$
-        iterations.setText("1"); // $NON-NLS-1$
         timeout.setText(""); // $NON-NLS-1$
         separator.setText(""); // $NON-NLS-1$
         useAuth.setSelected(false);

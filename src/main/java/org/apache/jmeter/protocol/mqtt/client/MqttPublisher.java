@@ -424,7 +424,7 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		SampleResult result = new SampleResult();
 
 		try {
-
+			
 			result.sampleStart(); // start stopwatch
 			produce(context);
 			result.sampleEnd(); // stop stopwatch
@@ -435,7 +435,6 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			result.sampleEnd(); // stop stopwatch
 			result.setSuccessful(false);
 			result.setResponseMessage("Exception: " + e);
-
 			// get stack trace as a String to return as document data
 			java.io.StringWriter stringWriter = new java.io.StringWriter();
 			e.printStackTrace(new java.io.PrintWriter(stringWriter));

@@ -45,7 +45,7 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	private static final String CLIENT_ID = "mqtt.clientId"; // $NON-NLS-1$
 	private static final String CLIENT_ID_DEFAULT = ""; // $NON-NLS-1$
 	private static final String TIMEOUT = "mqtt.timeout"; // $NON-NLS-1$
-	private static final String TIMEOUT_DEFAULT = ""; // $NON-NLS-1$
+	private static final String TIMEOUT_DEFAULT = "30000"; // $NON-NLS-1$
 	private static final String QUALITY = "mqtt.quality"; //$NON-NLS-1$
 	private static String OneConnectionPerTopic = "mqtt.one_connection_per_topic"; //$NON-NLS-1$
 	public transient MqttSubscriber subscriber = null;
@@ -53,7 +53,6 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	private static String Length = "mqtt.suffix.length";//$NON-NLS-1$
 	private static String RandomSuffix = "mqtt.random_suffix_client_id";//$NON-NLS-1$
 	private static String STRATEGY = "mqtt.strategy"; //$NON-NLS-1$
-	
 
 	public SubscriberSampler() {
 		super();
@@ -72,9 +71,11 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 		}
 
 	}
+
 	public void setQuality(String quality) {
 		setProperty(QUALITY, quality);
 	}
+
 	private String getQuality() {
 		return getPropertyAsString(QUALITY);
 	}
@@ -139,18 +140,47 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 
 	@Override
 	public boolean interrupt() {
+		
+		System.out.println("Hello interrupt");
+		log.debug("Thread ended " + new Date());
+		if (this.subscriber != null) {
+			try {
+				this.subscriber.close(context);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.warn(e.getLocalizedMessage(), e);
+			}
+
+		}
 		return false;
 	}
+
 	@Override
 	public void testEnded() {
+		System.out.println("Hello testended");
+		log.debug("Thread ended " + new Date());
+		if (this.subscriber != null) {
+			try {
+				this.subscriber.close(context);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.warn(e.getLocalizedMessage(), e);
+			}
+
+		}
 	}
+
 	@Override
 	public void testEnded(String arg0) {
 		testEnded();
 	}
+
 	@Override
 	public void testStarted() {
 	}
+
 	@Override
 	public void testStarted(String arg0) {
 		testStarted();
@@ -165,6 +195,7 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 					+ "], hashCode=[" + hashCode() + "]");
 		}
 	}
+
 	@Override
 	public void threadStarted() {
 		logThreadStart();
@@ -226,13 +257,14 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 		context = new JavaSamplerContext(parameters);
 		subscriber.setupTest(context);
 	}
+
 	@Override
 	public void threadFinished() {
 
 		log.debug("Thread ended " + new Date());
 		if (this.subscriber != null) {
 			try {
-				this.subscriber.close();
+				this.subscriber.close(context);
 
 			} catch (Exception e) {
 				e.printStackTrace();

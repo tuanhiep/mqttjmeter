@@ -72,13 +72,6 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 
 	// ---------------------Get/Set Property--------------------------//
 		
-	
-	
-	
-	
-	
-	
-	
 	public void setTYPE_FIXED_VALUE(String type) {
 		setProperty(TYPE_FIXED_VALUE, type);
 	}
