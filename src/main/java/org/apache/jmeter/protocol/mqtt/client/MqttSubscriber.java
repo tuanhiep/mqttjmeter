@@ -81,11 +81,12 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 				setupTest(host, clientId, topic, context.getParameter("USER"),
 						context.getParameter("PASSWORD"), 1,
 						Boolean.parseBoolean(context.getParameter("DURABLE")),
-						context.getParameter("QOS"));
+						context.getParameter("QOS"),context.getParameter("STRATEGY"));
+				
 			} else {
 				setupTest(host, clientId, topic, 1,
 						Boolean.parseBoolean(context.getParameter("DURABLE")),
-						context.getParameter("QOS"));
+						context.getParameter("QOS"),context.getParameter("STRATEGY"));
 			}
 		} else if ("TRUE".equals(context.getParameter("PER_TOPIC"))) {
 			String topics = context.getParameter("TOPIC");
@@ -95,18 +96,18 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 				setupTest(host, clientId, topics, context.getParameter("USER"),
 						context.getParameter("PASSWORD"), size,
 						Boolean.parseBoolean(context.getParameter("DURABLE")),
-						context.getParameter("QOS"));
+						context.getParameter("QOS"),context.getParameter("STRATEGY"));
 			} else {
 				setupTest(host, clientId, topics, size,
 						Boolean.parseBoolean(context.getParameter("DURABLE")),
-						context.getParameter("QOS"));
+						context.getParameter("QOS"),context.getParameter("STRATEGY"));
 			}
 		}
 	}
 
 	private void setupTest(String host, String clientId, String topic,
 			String user, String password, int size, boolean durable,
-			String quality) {
+			String quality,String strategy) {
 		try {
 			// Quality
 			QoS qos = null;
@@ -126,22 +127,40 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 				this.connectionArray[0].listener(new ListenerforSubscribe());
 				CallbackforSubscribe cbs = new CallbackforSubscribe();
 				CallbackforConnect cbc = new CallbackforConnect(topic,
-						connectionArray[0], cbs, qos);
+						connectionArray[0], cbs, qos,1);
 				this.connectionArray[0].connect(cbc);
 
 			} else if (size > 1) {
+				
+				if("ROUND_ROBIN".equals(strategy)){
+					for (int j = 0; j < size; j++) {
+						this.connectionArray[j] = createConnection(host, clientId
+								+ jmcx.getThreadNum() + j, durable, user, password);
+						this.connectionArray[j]
+								.listener(new ListenerforSubscribe());
+						CallbackforSubscribe cbs = new CallbackforSubscribe();
+						CallbackforConnect cbc = new CallbackforConnect(topic,
+								connectionArray[j], cbs, qos,size);
+						this.connectionArray[j].connect(cbc);
 
-				for (int j = 0; j < size; j++) {
-					this.connectionArray[j] = createConnection(host, clientId
-							+ jmcx.getThreadNum() + j, durable, user, password);
-					this.connectionArray[j]
+					}
+					
+				}
+				else if("RANDOM".equals(strategy)){
+					Random rand = new Random();	
+					String[] topicArray = topic.split("\\s*,\\s*");
+					int  r = rand.nextInt(size);
+					this.connectionArray[r] = createConnection(host, clientId
+							+ jmcx.getThreadNum() + r, durable, user, password);
+					this.connectionArray[r]
 							.listener(new ListenerforSubscribe());
 					CallbackforSubscribe cbs = new CallbackforSubscribe();
-					CallbackforConnect cbc = new CallbackforConnect(topic,
-							connectionArray[j], cbs, qos);
-					this.connectionArray[j].connect(cbc);
-
+					CallbackforConnect cbc = new CallbackforConnect(topicArray[r],
+							connectionArray[r], cbs, qos,1);
+					this.connectionArray[r].connect(cbc);
+					
 				}
+				
 			}
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());
@@ -149,7 +168,7 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 	}
 
 	private void setupTest(String host, String clientId, String topic,
-			int size, boolean durable, String quality) {
+			int size, boolean durable, String quality,String strategy) {
 		try {
 			// Quality
 			QoS qos = null;
@@ -168,10 +187,12 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 				this.connectionArray[0].listener(new ListenerforSubscribe());
 				CallbackforSubscribe cbs = new CallbackforSubscribe();
 				CallbackforConnect cbc = new CallbackforConnect(topic,
-						connectionArray[0], cbs, qos);
+						connectionArray[0], cbs, qos,1);
 				this.connectionArray[0].connect(cbc);
-				System.out.println("Hello setup Test");
+			
 			} else if (size > 1) {
+				
+				if("ROUND_ROBIN".equals(strategy)){
 				for (int j = 0; j < size; j++) {
 					this.connectionArray[j] = createConnection(host, clientId
 							+ jmcx.getThreadNum() + j, durable);
@@ -179,9 +200,22 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 							.listener(new ListenerforSubscribe());
 					CallbackforSubscribe cbs = new CallbackforSubscribe();
 					CallbackforConnect cbc = new CallbackforConnect(topic,
-							connectionArray[j], cbs, qos);
+							connectionArray[j], cbs, qos,size);
 					this.connectionArray[j].connect(cbc);
 				}
+				}else if("RANDOM".equals(strategy)){
+					Random rand = new Random();	
+					int  r = rand.nextInt(size);
+					String[] topicArray = topic.split("\\s*,\\s*");
+					this.connectionArray[r] = createConnection(host, clientId
+							+ jmcx.getThreadNum() + r, durable);
+					this.connectionArray[r].listener(new ListenerforSubscribe());
+					CallbackforSubscribe cbs = new CallbackforSubscribe();
+					CallbackforConnect cbc = new CallbackforConnect(topicArray[r],
+							connectionArray[r], cbs, qos,1);
+					this.connectionArray[r].connect(cbc);
+				}
+				
 			}
 		} catch (Exception e) {
 			getLogger().error(e.getMessage());

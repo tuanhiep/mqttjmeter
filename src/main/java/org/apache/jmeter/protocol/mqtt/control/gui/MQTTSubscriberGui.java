@@ -70,6 +70,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
     private final JCheckBox stopBetweenSamples = new JCheckBox(JMeterUtils.getResString("mqtt_stop_between_samples"), true); // $NON-NLS-1$
     private final JLabeledTextField clientId = new JLabeledTextField(JMeterUtils.getResString("mqtt_client_id")); //$NON-NLS-1$
     private final JLabeledRadioI18N typeQoSValue = new JLabeledRadioI18N("mqtt_qos", QTYPES_ITEMS,AT_MOST_ONCE); //$NON-NLS-1$
+    private final JCheckBox cleanSession = new JCheckBox(JMeterUtils.getResString("mqtt_clean_session"), false); // $NON-NLS-1$
     public MQTTSubscriberGui() {
         init();
     }
@@ -110,6 +111,8 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
         sampler.setOneConnectionPerTopic(this.connectionPerTopic.isSelected());
         sampler.setSTRATEGY(this.topicChoice.getText());
         sampler.setQuality(typeQoSValue.getText());
+        sampler.setCLEANSESSION(cleanSession.isSelected());
+        
     }
 
     private void init() {
@@ -127,6 +130,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
 		JPanel ControlPanel = new VerticalPanel();
 		ControlPanel.add(DPanel);
 		ControlPanel.add(createDestinationPane());
+		ControlPanel.add(cleanSession);
 		ControlPanel.add(createAuthPane());
 		ControlPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.gray),"Connection Info"));
 		mainPanel.add(ControlPanel);	
@@ -140,6 +144,7 @@ public class MQTTSubscriberGui extends AbstractSamplerGui implements ChangeListe
 		mainPanel.add(TPanel);
 		useAuth.addChangeListener(this);
 		suffixClientId.addChangeListener(this);
+		
     }
     /**
 	 * 

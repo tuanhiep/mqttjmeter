@@ -21,19 +21,20 @@
  */
 
 package org.apache.jmeter.protocol.mqtt.sampler;
-
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.protocol.mqtt.client.MqttPublisher;
 import org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui;
 import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.ThreadListener;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
-public class PublisherSampler extends BaseMQTTSampler implements ThreadListener {
+public class PublisherSampler extends BaseMQTTSampler implements ThreadListener,TestStateListener  {
 
 	private static final long serialVersionUID = 233L;
 	private static final Logger log = LoggingManager.getLoggerForClass();
@@ -60,7 +61,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	private static String RandomSuffix="mqtt.random_suffix_client_id";//$NON-NLS-1$
 	private static String Length="mqtt.suffix.length";//$NON-NLS-1$
 	public transient MqttPublisher producer = null;
-
+	public static AtomicInteger numberOfConnection= new AtomicInteger(0);
 	private JavaSamplerContext context = null;
 
 	/**
@@ -421,6 +422,7 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	@Override
 	public void threadFinished() {
 		log.debug("Thread ended " + new Date());
+				
 		if (producer != null) {
 
 			try {
@@ -442,6 +444,45 @@ public class PublisherSampler extends BaseMQTTSampler implements ThreadListener 
 	public SampleResult sample() {
 
 		return this.producer.runTest(context);
+	}
+
+	@Override
+	public void testEnded() {
+		log.debug("Thread ended " + new Date());
+		
+		
+		if (producer != null) {
+
+			try {
+				producer.close();
+				System.out.println("close at:"+ new Date());
+				MqttPublisher.numSeq = 0;
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+				log.warn(e.getLocalizedMessage(), e);
+			}
+
+		}
+
+		
+	}
+
+	@Override
+	public void testEnded(String arg0) {
+		testEnded();
+		
+	}
+
+	@Override
+	public void testStarted() {
+				
+	}
+
+	@Override
+	public void testStarted(String arg0) {
+		testStarted();
+		
 	}
 
 }

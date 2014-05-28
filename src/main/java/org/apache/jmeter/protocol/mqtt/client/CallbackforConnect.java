@@ -11,24 +11,36 @@ public class CallbackforConnect implements Callback<Void> {
 	private CallbackConnection connection;
 	private CallbackforSubscribe cbs;
 	private QoS qos;
+	private int size;
 
 	public CallbackforConnect(String topics, CallbackConnection connection,
-			CallbackforSubscribe cbs, QoS qos) {
+			CallbackforSubscribe cbs, QoS qos, int size) {
 		super();
 		this.topics = topics;
 		this.connection = connection;
 		this.cbs = cbs;
 		this.qos = qos;
+		this.size=size;
 	}
 
 	@Override
 	public void onSuccess(Void value) {
-		System.out.println("Connect sucessfully with topics " + topics);
-		String[] topicArray = topics.split("\\s*,\\s*");
-		Topic[] Tp = new Topic[topicArray.length];
-		for (int i = 0; i < topicArray.length; i++)
-			Tp[i] = new Topic(topicArray[i], qos);
-		connection.subscribe(Tp, cbs);
+		
+		if(size==1) {
+			Topic[] Tp = new Topic[1];
+			Tp[0] = new Topic(topics, qos);
+			connection.subscribe(Tp, cbs);
+			System.out.println("Connect sucessfully with only one topic " + topics);
+		}
+		else if (size>1){
+			String[] topicArray = topics.split("\\s*,\\s*");
+			Topic[] Tp = new Topic[topicArray.length];
+			for (int i = 0; i < topicArray.length; i++)
+				Tp[i] = new Topic(topicArray[i], qos);
+			connection.subscribe(Tp, cbs);
+			System.out.println("Connect sucessfully with these topics " + topics);
+		}
+		
 
 	}
 

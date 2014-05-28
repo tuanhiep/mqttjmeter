@@ -26,6 +26,7 @@ import java.util.Date;
 
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
+import org.apache.jmeter.protocol.mqtt.client.ListenerforSubscribe;
 import org.apache.jmeter.protocol.mqtt.client.MqttSubscriber;
 import org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui;
 import org.apache.jmeter.samplers.Interruptible;
@@ -53,9 +54,23 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	private static String Length = "mqtt.suffix.length";//$NON-NLS-1$
 	private static String RandomSuffix = "mqtt.random_suffix_client_id";//$NON-NLS-1$
 	private static String STRATEGY = "mqtt.strategy"; //$NON-NLS-1$
+	private static String CLEAN_SESSION="mqtt.clean.session";//$NON-NLS-1$
 
 	public SubscriberSampler() {
 		super();
+	}
+	
+	public String getCLEANSESSION() {
+		return getPropertyAsString(CLEAN_SESSION);
+	}
+
+	public void setCLEANSESSION(boolean cLEANSESSION) {		
+		
+		if(cLEANSESSION) {
+			setProperty(CLEAN_SESSION, "true");
+		}
+		else 
+			setProperty(CLEAN_SESSION, "false");
 	}
 
 	public void setOneConnectionPerTopic(boolean oneConnectionPerTopic) {
@@ -142,6 +157,7 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	public boolean interrupt() {
 		
 		System.out.println("Hello interrupt");
+		System.out.println("Received " + ListenerforSubscribe.count.get() +" messages");
 		log.debug("Thread ended " + new Date());
 		if (this.subscriber != null) {
 			try {
@@ -160,6 +176,7 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	public void testEnded() {
 		System.out.println("Hello testended");
 		log.debug("Thread ended " + new Date());
+		System.out.println("Received " + ListenerforSubscribe.count.get() +" messages");
 		if (this.subscriber != null) {
 			try {
 				this.subscriber.close(context);
@@ -224,7 +241,7 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 		parameters.addArgument("AGGREGATE", aggregate);
 		String quality = getQuality();
 		parameters.addArgument("QOS", quality);
-		parameters.addArgument("DURABLE", "false");
+		parameters.addArgument("DURABLE",this.getCLEANSESSION());
 		parameters.addArgument("TIMEOUT", timeout);
 
 		if (this.isUseAuth()) {
@@ -262,10 +279,11 @@ public class SubscriberSampler extends BaseMQTTSampler implements
 	public void threadFinished() {
 
 		log.debug("Thread ended " + new Date());
+		System.out.println("Received " + ListenerforSubscribe.count.get() +" messages");
 		if (this.subscriber != null) {
 			try {
 				this.subscriber.close(context);
-
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.warn(e.getLocalizedMessage(), e);

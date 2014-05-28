@@ -30,6 +30,7 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.codec.binary.Hex;
@@ -37,6 +38,7 @@ import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui;
+import org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContext;
 import org.apache.jmeter.threads.JMeterContextService;
@@ -97,12 +99,14 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			if(size==1){
 				this.connectionArray[0]= createConnection(host,clientId+jmcx.getThreadNum());
 				this.connectionArray[0].connect().await();
+				this.getLogger().info("NUMBER CONNECTION: "+PublisherSampler.numberOfConnection.getAndIncrement());
 			}
 			else 
 			{				
 				for(int i = 0;i< size;i++){
 					this.connectionArray[i]= createConnection(host,clientId+jmcx.getThreadNum()+i);
 					this.connectionArray[i].connect().await();
+					this.getLogger().info("NUMBER CONNECTION: "+PublisherSampler.numberOfConnection.getAndIncrement());
 				}
 			}
 					
@@ -119,12 +123,14 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 			if(size==1){
 				this.connectionArray[0]= createConnection(host,clientId+jmcx.getThreadNum(),user,password);
 				this.connectionArray[0].connect().await();
+				this.getLogger().info("NUMBER CONNECTION: "+PublisherSampler.numberOfConnection.getAndIncrement());
 				
 			}
 			else {
 				for(int i = 0;i< size;i++){
 					this.connectionArray[i]= createConnection(host,clientId+jmcx.getThreadNum()+i,user,password);
 					this.connectionArray[i].connect().await();
+					this.getLogger().info("NUMBER CONNECTION: "+PublisherSampler.numberOfConnection.getAndIncrement());
 				 }
 				 }
 			getLogger().info("Connection successful..");
@@ -453,11 +459,11 @@ public class MqttPublisher extends AbstractJavaSamplerClient implements
 		for(int p=0;p<this.connectionArray.length;p++){			
 			if (this.connectionArray[p] != null)
 				this.connectionArray[p].disconnect();
+				this.getLogger().info("NUMBER CONNECTION: "+PublisherSampler.numberOfConnection.getAndDecrement());
 			   	this.connectionArray[p]=null;
 													  }		
 	                                                  }			
 		this.connectionArray= null;
-
 	}
 		
 	public byte[] createPayload(String message, String useTimeStamp, String useNumSeq ,String type_value, String format, String charset) throws IOException, NumberFormatException {

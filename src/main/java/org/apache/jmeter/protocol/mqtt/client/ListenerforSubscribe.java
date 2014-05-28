@@ -8,7 +8,7 @@ import org.fusesource.mqtt.client.Listener;
 
 public class ListenerforSubscribe implements Listener {
 
-	private static AtomicInteger count= new AtomicInteger(0); 
+	public static AtomicInteger count= new AtomicInteger(0); 
 	@Override
 	public void onConnected() {
 		System.out.println("Subscriber is listening");
@@ -25,8 +25,7 @@ public class ListenerforSubscribe implements Listener {
 	public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
 //		String message = new String(body.getData());
 //		System.out.println("Received: "+message);
-		count.getAndIncrement();
-		System.out.println("Received " + count.get() +" messages");
+		count.getAndIncrement();		
 		ack.run();
 
 	}
