@@ -1,14 +1,14 @@
 package org.apache.jmeter.protocol.mqtt.client;
 
-import java.util.concurrent.atomic.AtomicInteger;
 
+import java.util.concurrent.atomic.AtomicLong;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.Listener;
 
 public class ListenerforSubscribe implements Listener {
 
-	public static AtomicInteger count= new AtomicInteger(0); 
+	public static AtomicLong count= new AtomicLong(0); 
 	@Override
 	public void onConnected() {
 		System.out.println("Subscriber is listening");

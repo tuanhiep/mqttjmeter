@@ -295,8 +295,7 @@ public class MqttSubscriber extends AbstractJavaSamplerClient implements
 				if (this.connectionArray[p] != null) {
 					this.connectionArray[p].unsubscribe(Topics,
 							new CallbackforUnsubscribe());
-					this.connectionArray[p]
-							.disconnect(new CallbackforDisconnect());
+					this.connectionArray[p].disconnect(new CallbackforDisconnect());
 				}
 
 				this.connectionArray[p] = null;
